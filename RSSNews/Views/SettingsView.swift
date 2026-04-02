@@ -7,6 +7,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
+    @ObservedObject var articleViewModel: ArticleListViewModel
     @ObservedObject var feedViewModel: FeedManagementViewModel
 
     private static let fetchedAtFormatter: DateFormatter = {
@@ -29,21 +30,34 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(feedViewModel.feeds) { feed in
-                        Toggle(
-                            isOn: Binding(
-                                get: { feed.isEnabled },
-                                set: { feedViewModel.setFeedEnabled(feed, isEnabled: $0) }
-                            )
-                        ) {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(feed.title)
-                                Text(feed.url)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                Text(lastFetchedText(for: feed))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                        HStack(alignment: .top, spacing: 12) {
+                            Toggle(
+                                isOn: Binding(
+                                    get: { feed.isEnabled },
+                                    set: { feedViewModel.setFeedEnabled(feed, isEnabled: $0) }
+                                )
+                            ) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(feed.title)
+                                    Text(feed.url)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                    Text(lastFetchedText(for: feed))
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
                             }
+
+                            Spacer(minLength: 12)
+
+                            Button(refreshButtonTitle(for: feed)) {
+                                Task {
+                                    if await feedViewModel.refreshFeed(feed) {
+                                        articleViewModel.loadArticles()
+                                    }
+                                }
+                            }
+                            .disabled(isRefreshDisabled(for: feed))
                         }
                     }
                 }
@@ -65,6 +79,11 @@ struct SettingsView: View {
         .onAppear {
             feedViewModel.loadFeeds()
         }
+        .alert("エラー", isPresented: .constant(feedViewModel.errorMessage != nil), actions: {
+            Button("OK") { feedViewModel.errorMessage = nil }
+        }, message: {
+            Text(feedViewModel.errorMessage ?? "")
+        })
     }
 
     private func lastFetchedText(for feed: RSSFeed) -> String {
@@ -72,5 +91,13 @@ struct SettingsView: View {
             return "最終更新: 未取得"
         }
         return "最終更新: \(Self.fetchedAtFormatter.string(from: lastFetchedAt))"
+    }
+
+    private func isRefreshDisabled(for feed: RSSFeed) -> Bool {
+        articleViewModel.isRefreshing || feedViewModel.isRefreshing(feed)
+    }
+
+    private func refreshButtonTitle(for feed: RSSFeed) -> String {
+        isRefreshDisabled(for: feed) ? "更新中..." : "更新"
     }
 }

@@ -41,11 +41,17 @@ final class ArticleListViewModel: ObservableObject {
     }
 
     func refreshAllFeeds() async {
-        isRefreshing = true
-        defer { isRefreshing = false }
-
         do {
             let feeds = try environment.feedRepository.fetchEnabledFeeds()
+            let feedURLs = feeds.map(\.url)
+            guard environment.feedRefreshCoordinator.beginRefreshingAllFeeds(urls: feedURLs) else { return }
+
+            isRefreshing = true
+            defer {
+                environment.feedRefreshCoordinator.endRefreshingAllFeeds(urls: feedURLs)
+                isRefreshing = false
+            }
+
             for feed in feeds {
                 guard let url = URL(string: feed.url) else { continue }
                 let data = try await environment.rssFetcher.fetch(from: url)

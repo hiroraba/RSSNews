@@ -9,6 +9,7 @@ import Combine
 @MainActor
 final class FeedManagementViewModel: ObservableObject {
     @Published private(set) var feeds: [RSSFeed] = []
+    @Published private(set) var refreshingFeedURLs: Set<String> = []
     @Published var newFeedURL = ""
     @Published var isLoading = false
     @Published var errorMessage: String?
@@ -74,5 +75,36 @@ final class FeedManagementViewModel: ObservableObject {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    func refreshFeed(_ feed: RSSFeed) async -> Bool {
+        guard let url = URL(string: feed.url) else {
+            errorMessage = RSSServiceError.invalidURL.localizedDescription
+            return false
+        }
+        guard environment.feedRefreshCoordinator.beginRefreshingFeed(feed.url) else { return false }
+
+        refreshingFeedURLs.insert(feed.url)
+        defer {
+            refreshingFeedURLs.remove(feed.url)
+            environment.feedRefreshCoordinator.endRefreshingFeed(feed.url)
+        }
+
+        do {
+            let data = try await environment.rssFetcher.fetch(from: url)
+            let parsedFeed = try environment.rssParser.parse(data: data)
+            feed.title = parsedFeed.title
+            try environment.articleRepository.upsert(items: parsedFeed.items, for: feed)
+            try environment.feedRepository.updateFetchedDate(for: feed)
+            loadFeeds()
+            return true
+        } catch {
+            errorMessage = error.localizedDescription
+            return false
+        }
+    }
+
+    func isRefreshing(_ feed: RSSFeed) -> Bool {
+        environment.feedRefreshCoordinator.isRefreshingFeed(feed.url)
     }
 }
