@@ -1,36 +1,36 @@
 ---
 name: rssnews-feature
-description: Use for feature work in the RSSNews repository when adding or extending behavior while preserving the existing architecture and keeping scope controlled.
+description: RSSNews リポジトリで機能追加や機能拡張を行うときに使う。既存アーキテクチャを保ちつつ、スコープを絞って実装する。
 ---
 
-# RSSNews Feature
+# RSSNews 機能追加
 
-Use this skill when the task is adding a user-facing capability or extending existing behavior in RSSNews.
+この skill は、RSSNews にユーザー向け機能を追加する作業や、既存機能を拡張する作業で使う。
 
-## Priorities
+## 優先事項
 
-1. Define the smallest user-visible outcome that satisfies the request.
-2. Fit the change into the existing `Models / Services / ViewModels / Views / Repositories` split.
-3. Avoid speculative abstractions and broad cleanup while implementing the feature.
-4. Check whether documentation was requested before touching README files.
-5. Run the mandatory post-change review with another model before finalizing.
+1. 依頼を満たす最小のユーザー価値を定義する。
+2. 変更を既存の `Models / Services / ViewModels / Views / Repositories` 分離へ収める。
+3. 機能実装中に、先回りした抽象化や広範囲な整理を持ち込まない。
+4. README に触れる前に、ドキュメント更新が明示的に依頼されているか確認する。
+5. 完了前に、必須の post-change review を別モデルで実行する。
 
-## Implementation Guidance
+## 実装方針
 
-- Put UI state and interaction flow in `ViewModels`.
-- Put fetch, parse, classify, and side-effectful business logic in `Services`.
-- Route persistence changes through existing `Repositories`.
-- Add model fields only when the feature truly needs persisted state.
-- Prefer incremental UI additions over redesigning existing screens.
+- UI 状態と操作フローは `ViewModels` に置く。
+- 取得、解析、分類、副作用を伴う業務ロジックは `Services` に置く。
+- 永続化の変更は既存の `Repositories` を経由させる。
+- 永続化が本当に必要な場合にだけ `Model` へフィールドを追加する。
+- 既存画面の全面刷新ではなく、段階的な UI 追加を優先する。
 
-## Validation
+## 確認項目
 
-- Verify the feature works from the user entry point through persistence and reload.
-- Check adjacent flows that may be affected, especially feed refresh, article filtering, selection state, settings, and local persistence.
-- State clearly whether tests were added, updated, or intentionally not changed.
+- ユーザーの入口から永続化、再読み込みまで含めて機能が成立することを確認する。
+- 影響しうる周辺フローを確認する。特に feed 更新、記事フィルタ、選択状態、設定、ローカル永続化を確認する。
+- テストを追加したか、更新したか、あえて変更しなかったかを明記する。
 
-## Commit Shape
+## コミット方針
 
-- Separate feature commits from bug-fix commits when feasible.
-- Keep unrelated cleanup out of the feature commit.
-- Do not bundle README edits unless the user explicitly requested them.
+- 可能なら機能追加のコミットと不具合修正のコミットを分ける。
+- 無関係な整理や cleanup を機能コミットへ混ぜない。
+- ユーザーから明示依頼がない限り、README 変更を同じコミットに含めない。

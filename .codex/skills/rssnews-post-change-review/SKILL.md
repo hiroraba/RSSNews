@@ -1,33 +1,33 @@
 ---
 name: rssnews-post-change-review
-description: Use for coding tasks in the RSSNews repository when you make code changes and need an independent code review pass from another model before finalizing.
+description: RSSNews リポジトリでコード変更後に使う。完了前に別モデルの独立したコードレビューを実施するための skill。
 ---
 
-# RSSNews Post-Change Review
+# RSSNews 変更後レビュー
 
-After you finish implementing a code change in this repository, run an independent review pass with another model before the final response. In this repository, this review is mandatory for code changes unless sub-agents are unavailable.
+このリポジトリでコード変更を終えたら、最終報告の前に別モデルで独立した review を行う。この review は、sub-agent が使えない場合を除き必須とする。
 
-## Workflow
+## 手順
 
-1. Complete the intended code change first.
-2. Review your own diff and identify the smallest relevant file set.
-3. Spawn a sub-agent with a different model for review.
-4. Ask the reviewer to focus on bugs, regressions, edge cases, and missing tests.
-5. Give the reviewer only the task summary, changed file paths, and any constraints needed for the review.
-6. If the reviewer finds a real issue, fix it before finalizing when feasible.
-7. If you do not fix a finding, explain why in the final response.
-8. In the final response, state whether the secondary review found anything important.
+1. 先に実装を完了する。
+2. 自分で差分を見直し、review 対象を必要最小限のファイル群に絞る。
+3. 別モデルの sub-agent を起動して review を依頼する。
+4. review ではバグ、回帰、境界条件、テスト不足を重点的に確認させる。
+5. reviewer には、タスク要約、変更ファイル、必要な制約だけを渡す。
+6. reviewer が実質的な問題を見つけたら、可能な限り修正してから完了する。
+7. 修正しない指摘がある場合は、最終報告で理由を説明する。
+8. 最終報告では、別モデル review の有無と重要な指摘の有無を明記する。
 
-## Reviewer Prompt Shape
+## reviewer への依頼文
 
-Use a prompt close to this:
+次のような文面を基準にする:
 
 ```text
-Review the recent RSSNews changes. Focus on bugs, regressions, edge cases, and missing tests. Report findings first with file references. Keep summaries brief.
+RSSNews の直近変更をレビューしてください。バグ、回帰、境界条件、テスト不足を重点的に確認し、所見はファイル参照付きで findings-first で報告してください。要約は簡潔にしてください。
 ```
 
-## Notes
+## 補足
 
-- Prefer a small, fast model for routine review and a stronger model when the change is risky.
-- Keep the review independent. Do not preload your own conclusions unless they are necessary constraints.
-- If sub-agents are unavailable, say that the secondary review could not be performed.
+- 通常の review では小さく速いモデルを優先し、変更リスクが高いときは強いモデルを使う。
+- review の独立性を保つ。必要な制約を除き、自分の結論を先に与えない。
+- sub-agent が使えない場合は、二次 review を実施できなかったことを明記する。

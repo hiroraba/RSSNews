@@ -1,34 +1,34 @@
 ---
 name: rssnews-bugfix
-description: Use for bug-fix tasks in the RSSNews repository when the goal is to repair incorrect behavior with minimal scope and verify regressions carefully.
+description: RSSNews リポジトリで不具合修正を行うときに使う。最小差分で誤動作を直し、回帰確認を重視する。
 ---
 
-# RSSNews Bugfix
+# RSSNews 不具合修正
 
-Use this skill when the task is fixing broken behavior, a regression, or an incorrect edge case in RSSNews.
+この skill は、RSSNews の誤動作、回帰、境界条件の不備を修正する作業で使う。
 
-## Priorities
+## 優先事項
 
-1. Reproduce or at least localize the failure before editing code.
-2. Prefer the smallest behavior-preserving fix.
-3. Avoid mixing new features, renames, or broad refactors into the same change.
-4. Check whether the bug should be covered by an existing or new test.
-5. Run the mandatory post-change review with another model before finalizing.
+1. 編集前に、少なくとも不具合の発生箇所を再現または特定する。
+2. 挙動を壊さない最小の修正を優先する。
+3. 新機能、命名変更、大きなリファクタを同じ変更に混ぜない。
+4. 既存テストまたは新規テストで補足すべき不具合か確認する。
+5. 完了前に、必須の post-change review を別モデルで実行する。
 
-## Implementation Guidance
+## 実装方針
 
-- Trace the failure to one layer first: `View`, `ViewModel`, `Service`, `Repository`, or `Model`.
-- Keep responsibilities separated. Do not fix a parsing issue by adding UI-state workarounds, and do not fix view behavior by moving parsing into a view model.
-- If the bug crosses layers, still patch only the minimum set of files needed for a correct fix.
-- If the change also improves diagnostics or comments, keep that secondary and tightly scoped to the bug.
+- まず不具合の起点となる層を特定する。対象は `View`、`ViewModel`、`Service`、`Repository`、`Model` のいずれか。
+- 責務分離を崩さない。パースの問題を UI 状態の回避策で直さず、View の問題を ViewModel へ不自然に押し込まない。
+- 不具合が複数層にまたがって見えても、正しく直すために必要な最小ファイルだけを変更する。
+- 診断改善やコメント追加を同時に入れる場合も、あくまで不具合修正に密接した範囲にとどめる。
 
-## Validation
+## 確認項目
 
-- Confirm the original symptom is removed.
-- Check nearby regressions, especially persistence, refresh timing, selection state, and read/favorite state.
-- State clearly whether tests were added, updated, or intentionally not changed.
+- 元の症状が解消されたことを確認する。
+- 近接する回帰を確認する。特に永続化、更新タイミング、選択状態、既読状態、お気に入り状態を確認する。
+- テストを追加したか、更新したか、あえて変更しなかったかを明記する。
 
-## Commit Shape
+## コミット方針
 
-- Keep bug fixes in their own commit when feasible.
-- Do not bundle README edits unless the user explicitly requested them.
+- 可能なら不具合修正は単独コミットに分ける。
+- ユーザーから明示依頼がない限り、README 変更を同じコミットに含めない。
