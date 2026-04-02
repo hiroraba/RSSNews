@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct RSSNewsApp: App {
@@ -14,5 +15,6 @@ struct RSSNewsApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: [RSSFeed.self, Article.self])
     }
 }
