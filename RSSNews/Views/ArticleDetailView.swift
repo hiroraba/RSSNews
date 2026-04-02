@@ -51,9 +51,9 @@ struct ArticleDetailView: View {
             .padding(24)
         }
         .navigationTitle("記事詳細")
-        .onAppear {
+        .task(id: article.link) {
             if markAsReadOnOpen, !article.isRead {
-                viewModel.toggleRead(for: article)
+                viewModel.markAsReadIfNeeded(for: article)
             }
         }
     }

@@ -53,6 +53,13 @@ final class ArticleRepository {
         try modelContext.save()
     }
 
+    func markAsRead(_ article: Article) throws {
+        guard !article.isRead else { return }
+        article.isRead = true
+        article.updatedAt = .now
+        try modelContext.save()
+    }
+
     func toggleFavorite(for article: Article) throws {
         article.isFavorite.toggle()
         article.updatedAt = .now

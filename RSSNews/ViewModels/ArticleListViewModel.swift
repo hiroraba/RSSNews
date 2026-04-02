@@ -71,6 +71,15 @@ final class ArticleListViewModel: ObservableObject {
         }
     }
 
+    func markAsReadIfNeeded(for article: Article) {
+        do {
+            try environment.articleRepository.markAsRead(article)
+            loadArticles()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     func toggleFavorite(for article: Article) {
         do {
             try environment.articleRepository.toggleFavorite(for: article)
