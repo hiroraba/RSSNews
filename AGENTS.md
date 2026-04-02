@@ -10,6 +10,7 @@
 ## ビルド手順
 
 - Xcode: `RSSNews.xcodeproj` を開き、`RSSNews` スキームを選んで Build / Run する。
+- Codex がビルド確認を行う場合、可能なら Xcode MCP の `BuildProject` を優先して使う。CLI の `xcodebuild` は代替手段とする。
 - CLI:
 
 ```bash
@@ -19,6 +20,7 @@ xcodebuild -project RSSNews.xcodeproj -scheme RSSNews -configuration Debug build
 ## テスト手順
 
 - 単体テスト / UIテストは `RSSNews` スキームから実行する。
+- Codex がテストを実行する場合、可能なら Xcode MCP の `RunAllTests` または `RunSomeTests` を優先して使う。CLI の `xcodebuild test` は代替手段とする。
 - CLI:
 
 ```bash
@@ -27,6 +29,7 @@ xcodebuild test -project RSSNews.xcodeproj -scheme RSSNews -destination 'platfor
 
 - 機能変更時は、影響範囲に応じて既存テストの修正・追加要否を必ず確認する。
 - 修正後は原則としてユニットテストを実行する。実行していない場合は、その理由を明記する。
+- ビルドやテストに失敗した場合は、可能なら Xcode MCP の `GetBuildLog`、`XcodeListNavigatorIssues`、`XcodeRefreshCodeIssuesInFile` を使って原因を確認し、要点を報告する。
 
 ## アーキテクチャ上の基本方針
 
@@ -54,6 +57,8 @@ xcodebuild test -project RSSNews.xcodeproj -scheme RSSNews -destination 'platfor
 - `README.md` と `RSSNews/README.md` は、ユーザーから明示的に依頼された場合のみ更新する。
 - 機能変更時は、関連テストの追加・更新要否を確認する。
 - 修正後は、影響範囲に応じたユニットテストを原則実行する。
+- SwiftUI の UI 変更時は、可能なら Xcode MCP の `RenderPreview` を使って対象画面の確認を行う。
+- Swift / SwiftUI のコード探索や局所診断では、可能なら Xcode MCP の `XcodeRead`、`XcodeGrep`、`XcodeGlob`、`XcodeRefreshCodeIssuesInFile` を優先して使う。
 - 機能変更時は、`README.md` と `RSSNews/README.md` の更新要否だけ確認し、明示依頼がない限り更新しない。
 - 仕様判断に迷う場合は、無料・ローカル完結・RSS中心という前提を優先する。
 
