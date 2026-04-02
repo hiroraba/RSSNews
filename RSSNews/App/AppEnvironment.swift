@@ -46,12 +46,33 @@ struct AppEnvironment {
     let articleRepository: ArticleRepository
     let feedRefreshCoordinator: FeedRefreshCoordinator
 
+    @MainActor
     init(modelContext: ModelContext) {
-        rssFetcher = RSSFetcher()
-        rssParser = RSSParser()
-        categorizer = NewsCategorizer()
-        feedRepository = FeedRepository(modelContext: modelContext)
-        articleRepository = ArticleRepository(modelContext: modelContext, categorizer: categorizer)
-        feedRefreshCoordinator = FeedRefreshCoordinator()
+        let categorizer = NewsCategorizer()
+        self.init(
+            rssFetcher: RSSFetcher(),
+            rssParser: RSSParser(),
+            categorizer: categorizer,
+            feedRepository: FeedRepository(modelContext: modelContext),
+            articleRepository: ArticleRepository(modelContext: modelContext, categorizer: categorizer),
+            feedRefreshCoordinator: FeedRefreshCoordinator()
+        )
+    }
+
+    @MainActor
+    init(
+        rssFetcher: RSSFetching,
+        rssParser: RSSParsing,
+        categorizer: NewsCategorizing,
+        feedRepository: FeedRepository,
+        articleRepository: ArticleRepository,
+        feedRefreshCoordinator: FeedRefreshCoordinator
+    ) {
+        self.rssFetcher = rssFetcher
+        self.rssParser = rssParser
+        self.categorizer = categorizer
+        self.feedRepository = feedRepository
+        self.articleRepository = articleRepository
+        self.feedRefreshCoordinator = feedRefreshCoordinator
     }
 }
