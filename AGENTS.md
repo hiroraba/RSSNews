@@ -46,6 +46,7 @@ xcodebuild test -project RSSNews.xcodeproj -scheme RSSNews -destination 'platfor
 - 最小差分を優先し、依頼範囲に直接必要な変更だけを入れる。
 - 既存の命名、ディレクトリ構成、実装スタイルを尊重する。
 - Codex は変更完了時に自動でコミットしてよいが、`git push` を行う前には必ず事前確認を取る。
+- コード変更後は、可能なら別モデルの sub-agent にコードレビューを依頼し、指摘の有無を確認してから完了する。
 - 機能変更時は、関連テストの追加・更新要否を確認する。
 - 機能変更時は、`README.md` と `RSSNews/README.md` の更新要否も確認する。
 - 仕様判断に迷う場合は、無料・ローカル完結・RSS中心という前提を優先する。
