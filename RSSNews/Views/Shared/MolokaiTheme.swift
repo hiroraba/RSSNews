@@ -1,0 +1,122 @@
+//
+//  MolokaiTheme.swift
+//  RSSNews
+//
+
+import SwiftUI
+
+enum MolokaiTheme {
+    static let background = Color(red: 0.08, green: 0.09, blue: 0.11)
+    static let surface = Color(red: 0.13, green: 0.15, blue: 0.17)
+    static let elevated = Color(red: 0.18, green: 0.20, blue: 0.23)
+    static let primary = Color(red: 0.65, green: 0.89, blue: 0.18)
+    static let secondary = Color(red: 0.90, green: 0.86, blue: 0.45)
+    static let accent = Color(red: 0.98, green: 0.59, blue: 0.12)
+    static let success = Color(red: 0.54, green: 0.78, blue: 0.26)
+    static let warning = Color(red: 0.99, green: 0.74, blue: 0.26)
+    static let text = Color(red: 0.97, green: 0.97, blue: 0.95)
+    static let textMuted = Color(red: 0.70, green: 0.73, blue: 0.70)
+
+    static let chromeGradient = LinearGradient(
+        colors: [
+            background,
+            Color(red: 0.11, green: 0.12, blue: 0.15),
+            Color(red: 0.07, green: 0.08, blue: 0.10)
+        ],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
+    static let spotlightGradient = RadialGradient(
+        colors: [
+            primary.opacity(0.15),
+            accent.opacity(0.08),
+            .clear
+        ],
+        center: .topTrailing,
+        startRadius: 40,
+        endRadius: 420
+    )
+}
+
+struct MolokaiCanvas<Content: View>: View {
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        GlassEffectContainer(spacing: 24) {
+            ZStack {
+                MolokaiTheme.chromeGradient
+                    .ignoresSafeArea()
+
+                MolokaiTheme.spotlightGradient
+                    .ignoresSafeArea()
+
+                Circle()
+                    .fill(MolokaiTheme.success.opacity(0.08))
+                    .frame(width: 360, height: 360)
+                    .blur(radius: 20)
+                    .offset(x: -360, y: 260)
+
+                content
+            }
+        }
+    }
+}
+
+struct MolokaiGlassCard: ViewModifier {
+    var tint: Color = MolokaiTheme.text.opacity(0.06)
+    var stroke: Color = MolokaiTheme.text.opacity(0.12)
+
+    func body(content: Content) -> some View {
+        content
+            .overlay {
+                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [stroke, MolokaiTheme.secondary.opacity(0.18)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+            }
+            .glassEffect(
+                .regular.tint(tint),
+                in: RoundedRectangle(cornerRadius: 26, style: .continuous)
+            )
+            .shadow(color: .black.opacity(0.18), radius: 22, x: 0, y: 14)
+    }
+}
+
+struct MolokaiChromeButtonStyle: ButtonStyle {
+    var tint: Color = MolokaiTheme.secondary
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(.subheadline, design: .rounded, weight: .semibold))
+            .foregroundStyle(MolokaiTheme.text)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 9)
+            .overlay {
+                Capsule(style: .continuous)
+                    .strokeBorder(tint.opacity(0.45), lineWidth: 1)
+            }
+            .glassEffect(
+                .regular
+                    .tint(tint.opacity(configuration.isPressed ? 0.22 : 0.14))
+                    .interactive(),
+                in: Capsule(style: .continuous)
+            )
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .animation(.easeOut(duration: 0.16), value: configuration.isPressed)
+    }
+}
+
+extension View {
+    func molokaiGlassCard(
+        tint: Color = MolokaiTheme.text.opacity(0.06),
+        stroke: Color = MolokaiTheme.text.opacity(0.12)
+    ) -> some View {
+        modifier(MolokaiGlassCard(tint: tint, stroke: stroke))
+    }
+}

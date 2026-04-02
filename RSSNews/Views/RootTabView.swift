@@ -13,7 +13,7 @@ struct RootTabView: View {
     @State private var settingsViewModel = SettingsViewModel()
 
     var body: some View {
-        Group {
+        MolokaiCanvas {
             if let articleViewModel, let feedViewModel {
                 TabView {
                     ArticleListView(viewModel: articleViewModel)
@@ -36,8 +36,11 @@ struct RootTabView: View {
                         }
                 }
                 .frame(minWidth: 980, minHeight: 640)
+                .tint(MolokaiTheme.secondary)
+                .preferredColorScheme(.dark)
             } else {
                 ProgressView()
+                    .tint(MolokaiTheme.secondary)
                     .task {
                         let environment = AppEnvironment(modelContext: modelContext)
                         let articleVM = ArticleListViewModel(environment: environment)

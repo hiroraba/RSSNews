@@ -7,66 +7,52 @@ import SwiftUI
 
 struct ArticleListView: View {
     @ObservedObject var viewModel: ArticleListViewModel
+    @State private var isSidebarVisible = true
 
     var body: some View {
-        NavigationSplitView {
-            VStack(alignment: .leading, spacing: 0) {
-                ArticleFilterBar(viewModel: viewModel)
-                    .padding(16)
-                    .background(.bar)
-
-                Divider()
-
-                List(viewModel.articles, selection: $viewModel.selectedArticle) { article in
-                    ArticleRowView(article: article)
-                        .tag(article)
-                        .contextMenu {
-                            Button(article.isRead ? "未読に戻す" : "既読にする") {
-                                viewModel.toggleRead(for: article)
-                            }
-                            Button(article.isFavorite ? "お気に入り解除" : "お気に入り") {
-                                viewModel.toggleFavorite(for: article)
-                            }
-                        }
+        NavigationStack {
+            HSplitView {
+                if isSidebarVisible {
+                    sidebarPane
+                        .frame(minWidth: 400, idealWidth: 470, maxWidth: 560)
                 }
-                .listStyle(.sidebar)
-                .overlay {
-                    if viewModel.articles.isEmpty {
-                        ContentUnavailableView(
-                            "記事がありません",
-                            systemImage: "newspaper.fill",
-                            description: Text("RSSを登録して更新すると記事が表示されます。")
-                        )
-                    }
-                }
+
+                detailPane
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .navigationTitle("記事")
-            .navigationSplitViewColumnWidth(min: 300, ideal: 340, max: 420)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .toolbar {
                 ToolbarItemGroup {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.18)) {
+                            isSidebarVisible.toggle()
+                        }
+                    } label: {
+                        Label(
+                            isSidebarVisible ? "記事一覧を隠す" : "記事一覧を表示",
+                            systemImage: "sidebar.leading"
+                        )
+                    }
+
                     Button("全件既読") {
                         viewModel.markAllAsRead()
                     }
+                    .buttonStyle(MolokaiChromeButtonStyle(tint: MolokaiTheme.warning))
+
                     Button {
                         Task { await viewModel.refreshAllFeeds() }
                     } label: {
                         if viewModel.isRefreshing {
-                            ProgressView()
-                                .controlSize(.small)
+                            Label("更新中...", systemImage: "hourglass")
                         } else {
                             Label("更新", systemImage: "arrow.clockwise")
                         }
                     }
+                    .buttonStyle(MolokaiChromeButtonStyle(tint: MolokaiTheme.secondary))
                 }
             }
-        } detail: {
-            if let article = viewModel.selectedArticle {
-                ArticleDetailView(article: article, viewModel: viewModel)
-            } else {
-                ContentUnavailableView("記事を選択", systemImage: "sidebar.left")
-            }
         }
-        .navigationSplitViewStyle(.balanced)
+        .navigationTitle("記事")
         .searchable(text: $viewModel.searchText, prompt: "タイトル・本文・配信元で検索")
         .onChange(of: viewModel.searchText) { _, _ in
             viewModel.loadArticles()
@@ -77,36 +63,136 @@ struct ArticleListView: View {
             Text(viewModel.errorMessage ?? "")
         })
     }
+
+    private var sidebarPane: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            ArticleFilterBar(viewModel: viewModel)
+
+            articleListPanel
+        }
+        .padding(20)
+    }
+
+    private var detailPane: some View {
+        Group {
+            if let article = viewModel.selectedArticle {
+                ArticleDetailView(article: article, viewModel: viewModel)
+            } else {
+                articlePlaceholder
+            }
+        }
+    }
+
+    private var articleListPanel: some View {
+        ScrollView {
+            LazyVStack(spacing: 12) {
+                ForEach(viewModel.articles) { article in
+                    Button {
+                        viewModel.selectedArticle = article
+                    } label: {
+                        ArticleRowView(
+                            article: article,
+                            isSelected: viewModel.selectedArticle?.id == article.id
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .contextMenu {
+                        Button(article.isRead ? "未読に戻す" : "既読にする") {
+                            viewModel.toggleRead(for: article)
+                        }
+                        Button(article.isFavorite ? "お気に入り解除" : "お気に入り") {
+                            viewModel.toggleFavorite(for: article)
+                        }
+                    }
+                }
+            }
+            .padding(10)
+        }
+        .overlay {
+            if viewModel.articles.isEmpty {
+                ContentUnavailableView(
+                    "記事がありません",
+                    systemImage: "newspaper.fill",
+                    description: Text("RSSを登録して更新すると記事が表示されます。")
+                )
+                .foregroundStyle(MolokaiTheme.text)
+            }
+        }
+        .molokaiGlassCard(
+            tint: MolokaiTheme.elevated.opacity(0.40),
+            stroke: MolokaiTheme.secondary.opacity(0.18)
+        )
+    }
+
+    private var articlePlaceholder: some View {
+        VStack(spacing: 18) {
+            Image(systemName: "newspaper.circle")
+                .font(.system(size: 46))
+                .foregroundStyle(MolokaiTheme.secondary)
+            Text("記事を選択")
+                .font(.system(.largeTitle, design: .rounded, weight: .bold))
+                .foregroundStyle(MolokaiTheme.text)
+            Text("左側のリストから記事を選ぶと、本文とメタデータをここに表示します。")
+                .foregroundStyle(MolokaiTheme.textMuted)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 320)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .molokaiGlassCard(
+            tint: MolokaiTheme.primary.opacity(0.08),
+            stroke: MolokaiTheme.primary.opacity(0.18)
+        )
+        .padding(20)
+    }
 }
 
 private struct ArticleFilterBar: View {
     @ObservedObject var viewModel: ArticleListViewModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("絞り込み")
-                .font(.headline)
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("記事")
+                        .font(.system(.title2, design: .rounded, weight: .bold))
+                        .foregroundStyle(MolokaiTheme.text)
+                    Text("未読やお気に入りを絞り込みながら、更新順に一覧できます。")
+                        .foregroundStyle(MolokaiTheme.textMuted)
+                }
 
-            Picker("カテゴリ", selection: $viewModel.selectedCategory) {
-                ForEach(NewsCategory.allCases) { category in
-                    Text(category.rawValue).tag(category)
+                Spacer()
+
+                if let lastRefreshDate = viewModel.lastRefreshDate {
+                    Label(lastRefreshDate.formatted(date: .abbreviated, time: .shortened), systemImage: "clock")
+                        .font(.system(.caption, design: .rounded, weight: .medium))
+                        .foregroundStyle(MolokaiTheme.secondary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Capsule().fill(MolokaiTheme.secondary.opacity(0.10)))
                 }
             }
-            .pickerStyle(.menu)
-            .frame(maxWidth: .infinity, alignment: .leading)
 
-            Toggle("未読のみ", isOn: $viewModel.unreadOnly)
-                .toggleStyle(.checkbox)
+            HStack(alignment: .center, spacing: 14) {
+                Picker("カテゴリ", selection: $viewModel.selectedCategory) {
+                    ForEach(NewsCategory.allCases) { category in
+                        Text(category.rawValue).tag(category)
+                    }
+                }
+                .pickerStyle(.menu)
 
-            Toggle("お気に入りのみ", isOn: $viewModel.favoritesOnly)
-                .toggleStyle(.checkbox)
+                Toggle("未読のみ", isOn: $viewModel.unreadOnly)
+                    .toggleStyle(.switch)
 
-            if let lastRefreshDate = viewModel.lastRefreshDate {
-                Text("最終更新: \(lastRefreshDate.formatted(date: .abbreviated, time: .shortened))")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Toggle("お気に入りのみ", isOn: $viewModel.favoritesOnly)
+                    .toggleStyle(.switch)
             }
+            .foregroundStyle(MolokaiTheme.text)
         }
+        .padding(20)
+        .molokaiGlassCard(
+            tint: MolokaiTheme.text.opacity(0.05),
+            stroke: MolokaiTheme.text.opacity(0.10)
+        )
         .onChange(of: viewModel.selectedCategory) { _, _ in viewModel.loadArticles() }
         .onChange(of: viewModel.unreadOnly) { _, _ in viewModel.loadArticles() }
         .onChange(of: viewModel.favoritesOnly) { _, _ in viewModel.loadArticles() }
@@ -115,37 +201,83 @@ private struct ArticleFilterBar: View {
 
 private struct ArticleRowView: View {
     let article: Article
+    let isSelected: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(article.title.isEmpty ? "(無題)" : article.title)
-                    .font(.headline)
+        HStack(alignment: .top, spacing: 14) {
+            RoundedRectangle(cornerRadius: 999, style: .continuous)
+                .fill(article.isRead ? MolokaiTheme.text.opacity(0.10) : MolokaiTheme.primary)
+                .frame(width: 5)
+
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .top, spacing: 10) {
+                    Text(article.title.isEmpty ? "(無題)" : article.title)
+                        .font(.system(.headline, design: .rounded, weight: .semibold))
+                        .foregroundStyle(MolokaiTheme.text)
+                        .lineLimit(2)
+
+                    Spacer(minLength: 8)
+
+                    HStack(spacing: 8) {
+                        if article.isFavorite {
+                            Image(systemName: "star.fill")
+                                .foregroundStyle(MolokaiTheme.accent)
+                        }
+                        if !article.isRead {
+                            Circle()
+                                .fill(MolokaiTheme.primary)
+                                .frame(width: 10, height: 10)
+                        }
+                    }
+                }
+
+                Text(article.summary.isEmpty ? "概要なし" : article.summary)
+                    .font(.system(.subheadline, design: .rounded))
+                    .foregroundStyle(MolokaiTheme.textMuted)
                     .lineLimit(2)
-                if article.isFavorite {
-                    Image(systemName: "star.fill")
-                        .foregroundStyle(.yellow)
-                }
-                if !article.isRead {
-                    Circle()
-                        .fill(.blue)
-                        .frame(width: 8, height: 8)
+
+                HStack(spacing: 10) {
+                    tag(article.sourceName, tint: MolokaiTheme.secondary)
+                    tag(article.category.rawValue, tint: MolokaiTheme.success)
+
+                    Spacer(minLength: 8)
+
+                    Text(article.publishedAt.formatted(date: .abbreviated, time: .shortened))
+                        .font(.system(.caption, design: .rounded, weight: .medium))
+                        .foregroundStyle(MolokaiTheme.textMuted)
                 }
             }
-
-            Text(article.summary.isEmpty ? "概要なし" : article.summary)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .lineLimit(3)
-
-            HStack {
-                Text(article.sourceName)
-                Text(article.category.rawValue)
-                Text(article.publishedAt.formatted(date: .abbreviated, time: .shortened))
-            }
-            .font(.caption)
-            .foregroundStyle(.tertiary)
         }
-        .padding(.vertical, 4)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 14)
+        .background {
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            (isSelected ? MolokaiTheme.elevated : MolokaiTheme.surface).opacity(0.76),
+                            MolokaiTheme.elevated.opacity(isSelected ? 0.66 : 0.50)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay {
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .strokeBorder(
+                            isSelected ? MolokaiTheme.primary.opacity(0.55) : MolokaiTheme.text.opacity(0.05),
+                            lineWidth: isSelected ? 1.2 : 1
+                        )
+                }
+        }
+    }
+
+    private func tag(_ text: String, tint: Color) -> some View {
+        Text(text)
+            .font(.system(.caption, design: .rounded, weight: .medium))
+            .foregroundStyle(MolokaiTheme.text)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(Capsule().fill(tint.opacity(0.18)))
     }
 }
