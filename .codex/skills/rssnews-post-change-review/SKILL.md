@@ -5,7 +5,7 @@ description: Use for coding tasks in the RSSNews repository when you make code c
 
 # RSSNews Post-Change Review
 
-After you finish implementing a code change in this repository, run an independent review pass with another model before the final response.
+After you finish implementing a code change in this repository, run an independent review pass with another model before the final response. In this repository, this review is mandatory for code changes unless sub-agents are unavailable.
 
 ## Workflow
 
@@ -15,7 +15,8 @@ After you finish implementing a code change in this repository, run an independe
 4. Ask the reviewer to focus on bugs, regressions, edge cases, and missing tests.
 5. Give the reviewer only the task summary, changed file paths, and any constraints needed for the review.
 6. If the reviewer finds a real issue, fix it before finalizing when feasible.
-7. In the final response, state whether the secondary review found anything important.
+7. If you do not fix a finding, explain why in the final response.
+8. In the final response, state whether the secondary review found anything important.
 
 ## Reviewer Prompt Shape
 
