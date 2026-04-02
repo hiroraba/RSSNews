@@ -26,7 +26,7 @@ struct RootTabView: View {
                             Label("RSS管理", systemImage: "dot.radiowaves.left.and.right")
                         }
 
-                    SettingsView(viewModel: settingsViewModel)
+                    SettingsView(viewModel: settingsViewModel, feedViewModel: feedViewModel)
                         .tabItem {
                             Label("設定", systemImage: "gearshape")
                         }

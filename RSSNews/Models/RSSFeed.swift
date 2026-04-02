@@ -13,6 +13,10 @@ final class RSSFeed {
     var createdAt: Date
     var lastFetchedAt: Date?
     var isActive: Bool
+    var isEnabled: Bool {
+        get { isActive }
+        set { isActive = newValue }
+    }
 
     init(
         url: String,

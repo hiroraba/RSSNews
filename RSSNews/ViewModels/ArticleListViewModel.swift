@@ -45,8 +45,8 @@ final class ArticleListViewModel: ObservableObject {
         defer { isRefreshing = false }
 
         do {
-            let feeds = try environment.feedRepository.fetchFeeds()
-            for feed in feeds where feed.isActive {
+            let feeds = try environment.feedRepository.fetchEnabledFeeds()
+            for feed in feeds {
                 guard let url = URL(string: feed.url) else { continue }
                 let data = try await environment.rssFetcher.fetch(from: url)
                 let parsed = try environment.rssParser.parse(data: data)

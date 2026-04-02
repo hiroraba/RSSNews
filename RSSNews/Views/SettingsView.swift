@@ -7,11 +7,35 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
+    @ObservedObject var feedViewModel: FeedManagementViewModel
 
     var body: some View {
         Form {
             Section("取得") {
                 Toggle("起動時にRSSを自動更新", isOn: $viewModel.autoRefreshOnLaunch)
+            }
+
+            Section("フィード") {
+                if feedViewModel.feeds.isEmpty {
+                    Text("RSSフィードはまだ登録されていません。")
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(feedViewModel.feeds) { feed in
+                        Toggle(
+                            isOn: Binding(
+                                get: { feed.isEnabled },
+                                set: { feedViewModel.setFeedEnabled(feed, isEnabled: $0) }
+                            )
+                        ) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(feed.title)
+                                Text(feed.url)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
             }
 
             Section("記事表示") {
@@ -27,5 +51,8 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .padding()
         .navigationTitle("設定")
+        .onAppear {
+            feedViewModel.loadFeeds()
+        }
     }
 }

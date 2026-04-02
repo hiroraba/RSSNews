@@ -66,4 +66,13 @@ final class FeedManagementViewModel: ObservableObject {
         }
         loadFeeds()
     }
+
+    func setFeedEnabled(_ feed: RSSFeed, isEnabled: Bool) {
+        do {
+            try environment.feedRepository.updateEnabledState(for: feed, isEnabled: isEnabled)
+            loadFeeds()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
 }

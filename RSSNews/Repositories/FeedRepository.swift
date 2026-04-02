@@ -19,6 +19,14 @@ final class FeedRepository {
         return try modelContext.fetch(descriptor)
     }
 
+    func fetchEnabledFeeds() throws -> [RSSFeed] {
+        let descriptor = FetchDescriptor<RSSFeed>(
+            predicate: #Predicate { $0.isActive == true },
+            sortBy: [SortDescriptor(\.createdAt, order: .forward)]
+        )
+        return try modelContext.fetch(descriptor)
+    }
+
     func addFeed(urlString: String, title: String) throws -> RSSFeed {
         let normalized = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalized.isEmpty else { throw RSSServiceError.emptyFeedURL }
@@ -41,6 +49,11 @@ final class FeedRepository {
 
     func updateFetchedDate(for feed: RSSFeed) throws {
         feed.lastFetchedAt = .now
+        try modelContext.save()
+    }
+
+    func updateEnabledState(for feed: RSSFeed, isEnabled: Bool) throws {
+        feed.isEnabled = isEnabled
         try modelContext.save()
     }
 
