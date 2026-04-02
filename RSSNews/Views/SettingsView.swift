@@ -9,6 +9,14 @@ struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
     @ObservedObject var feedViewModel: FeedManagementViewModel
 
+    private static let fetchedAtFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ja_JP")
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter
+    }()
+
     var body: some View {
         Form {
             Section("取得") {
@@ -30,6 +38,9 @@ struct SettingsView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(feed.title)
                                 Text(feed.url)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                Text(lastFetchedText(for: feed))
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
@@ -54,5 +65,12 @@ struct SettingsView: View {
         .onAppear {
             feedViewModel.loadFeeds()
         }
+    }
+
+    private func lastFetchedText(for feed: RSSFeed) -> String {
+        guard let lastFetchedAt = feed.lastFetchedAt else {
+            return "最終更新: 未取得"
+        }
+        return "最終更新: \(Self.fetchedAtFormatter.string(from: lastFetchedAt))"
     }
 }
