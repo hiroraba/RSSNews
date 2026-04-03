@@ -12,6 +12,7 @@ final class ArticleListViewModel: ObservableObject {
     @Published var selectedArticle: Article?
     @Published var searchText = ""
     @Published var selectedCategory: NewsCategory = .all
+    @Published var selectedSort: ArticleSortOption = .newestFirst
     @Published var favoritesOnly = false
     @Published var unreadOnly = false
     @Published var isRefreshing = false
@@ -30,6 +31,7 @@ final class ArticleListViewModel: ObservableObject {
 
     var hasActiveFilters: Bool {
         !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || selectedCategory != .all || favoritesOnly || unreadOnly
+        || selectedSort != .newestFirst
     }
 
     init(environment: AppEnvironment) {
@@ -42,7 +44,8 @@ final class ArticleListViewModel: ObservableObject {
                 query: searchText,
                 category: selectedCategory,
                 favoritesOnly: favoritesOnly,
-                unreadOnly: unreadOnly
+                unreadOnly: unreadOnly,
+                sort: selectedSort
             )
             if selectedArticle == nil {
                 selectedArticle = articles.first
@@ -121,6 +124,7 @@ final class ArticleListViewModel: ObservableObject {
     func resetFilters() {
         searchText = ""
         selectedCategory = .all
+        selectedSort = .newestFirst
         favoritesOnly = false
         unreadOnly = false
         loadArticles()

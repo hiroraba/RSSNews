@@ -98,11 +98,71 @@ struct RepositoryTests {
             query: "swift",
             category: .technology,
             favoritesOnly: true,
-            unreadOnly: true
+            unreadOnly: true,
+            sort: .newestFirst
         )
 
         #expect(unreadFavorites.count == 1)
         #expect(unreadFavorites[0].title == "Swift Release")
+    }
+
+    @Test func articleRepositoryは指定された並び順で記事を返す() throws {
+        let repositories = try TestSupport.makeRepositories()
+        let feed = try repositories.feedRepository.addFeed(urlString: "https://example.com/feed.xml", title: "Feed")
+
+        try repositories.articleRepository.upsert(
+            items: [
+                ParsedRSSItem(
+                    title: "Newest",
+                    link: "https://example.com/articles/1",
+                    summary: "summary",
+                    publishedAt: .now
+                ),
+                ParsedRSSItem(
+                    title: "Oldest",
+                    link: "https://example.com/articles/2",
+                    summary: "summary",
+                    publishedAt: .now.addingTimeInterval(-120)
+                ),
+                ParsedRSSItem(
+                    title: "Middle",
+                    link: "https://example.com/articles/3",
+                    summary: "summary",
+                    publishedAt: .now.addingTimeInterval(-60)
+                )
+            ],
+            for: feed
+        )
+
+        let articles = try repositories.articleRepository.fetchArticles()
+        try #require(articles.first(where: { $0.title == "Newest" })).isFavorite = true
+        try #require(articles.first(where: { $0.title == "Oldest" })).isRead = true
+
+        let oldestFirst = try repositories.articleRepository.searchArticles(
+            query: "",
+            category: .all,
+            favoritesOnly: false,
+            unreadOnly: false,
+            sort: .oldestFirst
+        )
+        let unreadFirst = try repositories.articleRepository.searchArticles(
+            query: "",
+            category: .all,
+            favoritesOnly: false,
+            unreadOnly: false,
+            sort: .unreadFirst
+        )
+        let favoritesFirst = try repositories.articleRepository.searchArticles(
+            query: "",
+            category: .all,
+            favoritesOnly: false,
+            unreadOnly: false,
+            sort: .favoritesFirst
+        )
+
+        #expect(oldestFirst.map(\.title) == ["Oldest", "Middle", "Newest"])
+        #expect(unreadFirst.first?.title != "Oldest")
+        #expect(favoritesFirst.first?.title == "Newest")
     }
 
     @Test func articleRepositoryは既読とお気に入りを更新できる() throws {

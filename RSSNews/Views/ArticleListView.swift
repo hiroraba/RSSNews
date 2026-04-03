@@ -160,7 +160,7 @@ private struct ArticleFilterBar: View {
 
                         unreadBadge
                     }
-                    Text("未読やお気に入りを絞り込みながら、更新順に一覧できます。")
+                    Text("未読やお気に入りを絞り込みながら、好みの順で一覧できます。")
                         .foregroundStyle(MolokaiTheme.textMuted)
                 }
 
@@ -179,27 +179,40 @@ private struct ArticleFilterBar: View {
                 }
             }
 
-            HStack(alignment: .center, spacing: 14) {
-                Picker("カテゴリ", selection: $viewModel.selectedCategory) {
-                    ForEach(NewsCategory.allCases) { category in
-                        Text(category.rawValue).tag(category)
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 14) {
+                    Picker("カテゴリ", selection: $viewModel.selectedCategory) {
+                        ForEach(NewsCategory.allCases) { category in
+                            Text(category.rawValue).tag(category)
+                        }
                     }
+                    .pickerStyle(.menu)
+
+                    Picker("並び順", selection: $viewModel.selectedSort) {
+                        ForEach(ArticleSortOption.allCases) { option in
+                            Text(option.rawValue).tag(option)
+                        }
+                    }
+                    .pickerStyle(.menu)
+
+                    Spacer(minLength: 0)
                 }
-                .pickerStyle(.menu)
 
-                Toggle("未読のみ", isOn: $viewModel.unreadOnly)
-                    .toggleStyle(.switch)
+                HStack(spacing: 14) {
+                    Toggle("未読のみ", isOn: $viewModel.unreadOnly)
+                        .toggleStyle(.switch)
 
-                Toggle("お気に入りのみ", isOn: $viewModel.favoritesOnly)
-                    .toggleStyle(.switch)
+                    Toggle("お気に入りのみ", isOn: $viewModel.favoritesOnly)
+                        .toggleStyle(.switch)
 
-                Spacer(minLength: 0)
+                    Spacer(minLength: 0)
 
-                if viewModel.hasActiveFilters {
-                    Button("条件クリア") {
-                        viewModel.resetFilters()
+                    if viewModel.hasActiveFilters {
+                        Button("条件クリア") {
+                            viewModel.resetFilters()
+                        }
+                        .buttonStyle(MolokaiChromeButtonStyle(tint: MolokaiTheme.textMuted))
                     }
-                    .buttonStyle(MolokaiChromeButtonStyle(tint: MolokaiTheme.textMuted))
                 }
             }
             .foregroundStyle(MolokaiTheme.text)
@@ -210,6 +223,7 @@ private struct ArticleFilterBar: View {
             stroke: MolokaiTheme.text.opacity(0.10)
         )
         .onChange(of: viewModel.selectedCategory) { _, _ in viewModel.loadArticles() }
+        .onChange(of: viewModel.selectedSort) { _, _ in viewModel.loadArticles() }
         .onChange(of: viewModel.unreadOnly) { _, _ in viewModel.loadArticles() }
         .onChange(of: viewModel.favoritesOnly) { _, _ in viewModel.loadArticles() }
     }

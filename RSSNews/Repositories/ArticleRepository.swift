@@ -21,9 +21,15 @@ final class ArticleRepository {
         return try modelContext.fetch(descriptor)
     }
 
-    func searchArticles(query: String, category: NewsCategory, favoritesOnly: Bool, unreadOnly: Bool) throws -> [Article] {
+    func searchArticles(
+        query: String,
+        category: NewsCategory,
+        favoritesOnly: Bool,
+        unreadOnly: Bool,
+        sort: ArticleSortOption
+    ) throws -> [Article] {
         let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        return try fetchArticles().filter { article in
+        let filteredArticles = try fetchArticles().filter { article in
             let categoryMatch = category == .all || article.category == category
             let favoriteMatch = !favoritesOnly || article.isFavorite
             let unreadMatch = !unreadOnly || !article.isRead
@@ -37,6 +43,31 @@ final class ArticleRepository {
             }
 
             return categoryMatch && favoriteMatch && unreadMatch && queryMatch
+        }
+
+        switch sort {
+        case .newestFirst:
+            return filteredArticles.sorted { lhs, rhs in
+                lhs.publishedAt > rhs.publishedAt
+            }
+        case .oldestFirst:
+            return filteredArticles.sorted { lhs, rhs in
+                lhs.publishedAt < rhs.publishedAt
+            }
+        case .unreadFirst:
+            return filteredArticles.sorted { lhs, rhs in
+                if lhs.isRead != rhs.isRead {
+                    return !lhs.isRead && rhs.isRead
+                }
+                return lhs.publishedAt > rhs.publishedAt
+            }
+        case .favoritesFirst:
+            return filteredArticles.sorted { lhs, rhs in
+                if lhs.isFavorite != rhs.isFavorite {
+                    return lhs.isFavorite && !rhs.isFavorite
+                }
+                return lhs.publishedAt > rhs.publishedAt
+            }
         }
     }
 

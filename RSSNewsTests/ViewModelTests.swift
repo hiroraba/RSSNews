@@ -201,6 +201,7 @@ struct ViewModelTests {
 
         viewModel.searchText = "Swift"
         viewModel.selectedCategory = .technology
+        viewModel.selectedSort = .favoritesFirst
         viewModel.favoritesOnly = true
         viewModel.unreadOnly = true
         viewModel.loadArticles()
@@ -213,6 +214,7 @@ struct ViewModelTests {
         #expect(!viewModel.hasActiveFilters)
         #expect(viewModel.searchText.isEmpty)
         #expect(viewModel.selectedCategory == .all)
+        #expect(viewModel.selectedSort == .newestFirst)
         #expect(viewModel.favoritesOnly == false)
         #expect(viewModel.unreadOnly == false)
         #expect(viewModel.articles.count == 2)
