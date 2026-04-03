@@ -40,7 +40,7 @@ final class ArticleListViewModel: ObservableObject {
         }
     }
 
-    func refreshAllFeeds() async {
+    func refreshAllFeeds(reportErrors: Bool = true) async {
         do {
             let feeds = try environment.feedRepository.fetchEnabledFeeds()
             let feedURLs = feeds.map(\.url)
@@ -64,7 +64,9 @@ final class ArticleListViewModel: ObservableObject {
             lastRefreshDate = .now
             loadArticles()
         } catch {
-            errorMessage = error.localizedDescription
+            if reportErrors {
+                errorMessage = error.localizedDescription
+            }
         }
     }
 

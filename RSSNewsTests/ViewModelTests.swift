@@ -81,6 +81,31 @@ struct ViewModelTests {
         #expect(viewModel.articles.isEmpty)
     }
 
+    @Test func articleListViewModelは起動時自動更新の失敗をアラート用エラーにしない() async throws {
+        let container = try TestSupport.makeModelContainer()
+        let context = ModelContext(container)
+        let feedRepository = FeedRepository(modelContext: context)
+        let articleRepository = ArticleRepository(modelContext: context, categorizer: NewsCategorizer())
+        _ = try feedRepository.addFeed(urlString: "https://example.com/feed.xml", title: "Feed")
+
+        let environment = AppEnvironment(
+            rssFetcher: MockRSSFetcher(result: .failure(RSSServiceError.invalidResponse)),
+            rssParser: MockRSSParser(result: .success(
+                ParsedRSSFeed(title: "Feed", items: [TestSupport.makeParsedItem()])
+            )),
+            categorizer: NewsCategorizer(),
+            feedRepository: feedRepository,
+            articleRepository: articleRepository,
+            feedRefreshCoordinator: FeedRefreshCoordinator()
+        )
+        let viewModel = ArticleListViewModel(environment: environment)
+
+        await viewModel.refreshAllFeeds(reportErrors: false)
+
+        #expect(viewModel.errorMessage == nil)
+        #expect(viewModel.lastRefreshDate == nil)
+    }
+
     @Test func feedManagementViewModelはフィード追加時に取得結果を保存する() async throws {
         let container = try TestSupport.makeModelContainer()
         let context = ModelContext(container)

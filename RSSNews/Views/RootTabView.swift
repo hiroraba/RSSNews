@@ -50,7 +50,7 @@ struct RootTabView: View {
                         feedVM.loadFeeds()
                         articleVM.loadArticles()
                         if settingsViewModel.autoRefreshOnLaunch {
-                            await articleVM.refreshAllFeeds()
+                            await articleVM.refreshAllFeeds(reportErrors: false)
                             feedVM.loadFeeds()
                         }
                     }
