@@ -74,10 +74,12 @@ struct MolokaiGlassCard: ViewModifier {
             .overlay {
                 RoundedRectangle(cornerRadius: 26, style: .continuous)
                     .fill(tint)
+                    .allowsHitTesting(false)
             }
             .overlay {
                 RoundedRectangle(cornerRadius: 26, style: .continuous)
                     .strokeBorder(stroke, lineWidth: 1)
+                    .allowsHitTesting(false)
             }
             .shadow(color: .black.opacity(0.16), radius: 16, x: 0, y: 10)
     }
@@ -99,10 +101,12 @@ struct MolokaiChromeButtonStyle: ButtonStyle {
             .overlay {
                 Capsule(style: .continuous)
                     .fill(tint.opacity(configuration.isPressed ? 0.20 : 0.12))
+                    .allowsHitTesting(false)
             }
             .overlay {
                 Capsule(style: .continuous)
                     .strokeBorder(tint.opacity(0.45), lineWidth: 1)
+                    .allowsHitTesting(false)
             }
             .shadow(color: .black.opacity(configuration.isPressed ? 0.10 : 0.16), radius: 10, x: 0, y: 6)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
