@@ -43,22 +43,20 @@ struct MolokaiCanvas<Content: View>: View {
     @ViewBuilder var content: Content
 
     var body: some View {
-        GlassEffectContainer(spacing: 24) {
-            ZStack {
-                MolokaiTheme.chromeGradient
-                    .ignoresSafeArea()
+        ZStack {
+            MolokaiTheme.chromeGradient
+                .ignoresSafeArea()
 
-                MolokaiTheme.spotlightGradient
-                    .ignoresSafeArea()
+            MolokaiTheme.spotlightGradient
+                .ignoresSafeArea()
 
-                Circle()
-                    .fill(MolokaiTheme.success.opacity(0.08))
-                    .frame(width: 360, height: 360)
-                    .blur(radius: 20)
-                    .offset(x: -360, y: 260)
+            Circle()
+                .fill(MolokaiTheme.success.opacity(0.08))
+                .frame(width: 360, height: 360)
+                .blur(radius: 20)
+                .offset(x: -360, y: 260)
 
-                content
-            }
+            content
         }
     }
 }
@@ -69,22 +67,19 @@ struct MolokaiGlassCard: ViewModifier {
 
     func body(content: Content) -> some View {
         content
+            .background {
+                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                    .fill(MolokaiTheme.surface)
+            }
             .overlay {
                 RoundedRectangle(cornerRadius: 26, style: .continuous)
-                    .strokeBorder(
-                        LinearGradient(
-                            colors: [stroke, MolokaiTheme.secondary.opacity(0.18)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1
-                    )
+                    .fill(tint)
             }
-            .glassEffect(
-                .regular.tint(tint),
-                in: RoundedRectangle(cornerRadius: 26, style: .continuous)
-            )
-            .shadow(color: .black.opacity(0.18), radius: 22, x: 0, y: 14)
+            .overlay {
+                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                    .strokeBorder(stroke, lineWidth: 1)
+            }
+            .shadow(color: .black.opacity(0.16), radius: 16, x: 0, y: 10)
     }
 }
 
@@ -97,16 +92,19 @@ struct MolokaiChromeButtonStyle: ButtonStyle {
             .foregroundStyle(MolokaiTheme.text)
             .padding(.horizontal, 14)
             .padding(.vertical, 9)
+            .background {
+                Capsule(style: .continuous)
+                    .fill(MolokaiTheme.elevated)
+            }
+            .overlay {
+                Capsule(style: .continuous)
+                    .fill(tint.opacity(configuration.isPressed ? 0.20 : 0.12))
+            }
             .overlay {
                 Capsule(style: .continuous)
                     .strokeBorder(tint.opacity(0.45), lineWidth: 1)
             }
-            .glassEffect(
-                .regular
-                    .tint(tint.opacity(configuration.isPressed ? 0.22 : 0.14))
-                    .interactive(),
-                in: Capsule(style: .continuous)
-            )
+            .shadow(color: .black.opacity(configuration.isPressed ? 0.10 : 0.16), radius: 10, x: 0, y: 6)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
             .animation(.easeOut(duration: 0.16), value: configuration.isPressed)
     }

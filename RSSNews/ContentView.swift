@@ -41,10 +41,10 @@ private extension ContentView {
         let articles = [
             Article(
                 link: "https://example.com/articles/liquid-glass",
-                title: "Liquid Glass の導入で macOS アプリの情報密度を再設計する",
+                title: "ソリッドなカード設計で macOS アプリの情報密度を再設計する",
                 sourceName: "Product Notes",
                 publishedAt: .now.addingTimeInterval(-2400),
-                summary: "Apple 純正の glassEffect を用いて、一覧と詳細のコントラストを維持しながら近未来感を出す設計メモです。",
+                summary: "ソリッドな面と控えめなアクセントラインで、一覧と詳細のコントラストを整理する設計メモです。",
                 category: .technology,
                 isFavorite: true,
                 feed: productFeed
@@ -63,7 +63,7 @@ private extension ContentView {
                 title: "サイドバーのカード密度を整えて読みやすさを改善する",
                 sourceName: "Product Notes",
                 publishedAt: .now.addingTimeInterval(-9200),
-                summary: "外側のガラス面と内側の行カードが競合しないよう、余白とアクセントラインで階層を再構成しました。",
+                summary: "外側と内側のカードが競合しないよう、余白とアクセントラインで階層を再構成しました。",
                 category: .culture,
                 isRead: true,
                 feed: productFeed

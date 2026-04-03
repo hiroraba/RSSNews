@@ -25,10 +25,10 @@ struct FeedManagementView: View {
                     .padding(.vertical, 14)
                     .background(
                         RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .fill(MolokaiTheme.surface.opacity(0.70))
+                            .fill(MolokaiTheme.surface)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                    .strokeBorder(MolokaiTheme.text.opacity(0.08), lineWidth: 1)
+                                    .strokeBorder(MolokaiTheme.text.opacity(0.10), lineWidth: 1)
                             )
                     )
                     .foregroundStyle(MolokaiTheme.text)
@@ -71,10 +71,10 @@ struct FeedManagementView: View {
                     .padding(14)
                     .background(
                         RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .fill(MolokaiTheme.surface.opacity(0.56))
+                            .fill(MolokaiTheme.surface)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                    .strokeBorder(MolokaiTheme.text.opacity(0.05), lineWidth: 1)
+                                    .strokeBorder(MolokaiTheme.text.opacity(0.08), lineWidth: 1)
                             )
                     )
                     .listRowBackground(Color.clear)

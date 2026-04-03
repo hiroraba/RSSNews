@@ -120,10 +120,10 @@ struct SettingsView: View {
                     .padding(16)
                     .background(
                         RoundedRectangle(cornerRadius: 22, style: .continuous)
-                            .fill(MolokaiTheme.surface.opacity(0.72))
+                            .fill(MolokaiTheme.surface)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 22, style: .continuous)
-                                    .strokeBorder(MolokaiTheme.text.opacity(0.08), lineWidth: 1)
+                                    .strokeBorder(MolokaiTheme.text.opacity(0.10), lineWidth: 1)
                             )
                     )
                 }

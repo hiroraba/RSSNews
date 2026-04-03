@@ -20,6 +20,18 @@ final class ArticleListViewModel: ObservableObject {
 
     private let environment: AppEnvironment
 
+    var unreadCount: Int {
+        articles.reduce(into: 0) { count, article in
+            if !article.isRead {
+                count += 1
+            }
+        }
+    }
+
+    var hasActiveFilters: Bool {
+        !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || selectedCategory != .all || favoritesOnly || unreadOnly
+    }
+
     init(environment: AppEnvironment) {
         self.environment = environment
     }
@@ -104,5 +116,13 @@ final class ArticleListViewModel: ObservableObject {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    func resetFilters() {
+        searchText = ""
+        selectedCategory = .all
+        favoritesOnly = false
+        unreadOnly = false
+        loadArticles()
     }
 }

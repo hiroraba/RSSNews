@@ -153,9 +153,13 @@ private struct ArticleFilterBar: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("記事")
-                        .font(.system(.title2, design: .rounded, weight: .bold))
-                        .foregroundStyle(MolokaiTheme.text)
+                    HStack(spacing: 10) {
+                        Text("記事")
+                            .font(.system(.title2, design: .rounded, weight: .bold))
+                            .foregroundStyle(MolokaiTheme.text)
+
+                        unreadBadge
+                    }
                     Text("未読やお気に入りを絞り込みながら、更新順に一覧できます。")
                         .foregroundStyle(MolokaiTheme.textMuted)
                 }
@@ -168,7 +172,10 @@ private struct ArticleFilterBar: View {
                         .foregroundStyle(MolokaiTheme.secondary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
-                        .background(Capsule().fill(MolokaiTheme.secondary.opacity(0.10)))
+                        .background(Capsule().fill(MolokaiTheme.elevated))
+                        .overlay {
+                            Capsule().strokeBorder(MolokaiTheme.secondary.opacity(0.28), lineWidth: 1)
+                        }
                 }
             }
 
@@ -185,6 +192,15 @@ private struct ArticleFilterBar: View {
 
                 Toggle("お気に入りのみ", isOn: $viewModel.favoritesOnly)
                     .toggleStyle(.switch)
+
+                Spacer(minLength: 0)
+
+                if viewModel.hasActiveFilters {
+                    Button("条件クリア") {
+                        viewModel.resetFilters()
+                    }
+                    .buttonStyle(MolokaiChromeButtonStyle(tint: MolokaiTheme.textMuted))
+                }
             }
             .foregroundStyle(MolokaiTheme.text)
         }
@@ -196,6 +212,18 @@ private struct ArticleFilterBar: View {
         .onChange(of: viewModel.selectedCategory) { _, _ in viewModel.loadArticles() }
         .onChange(of: viewModel.unreadOnly) { _, _ in viewModel.loadArticles() }
         .onChange(of: viewModel.favoritesOnly) { _, _ in viewModel.loadArticles() }
+    }
+
+    private var unreadBadge: some View {
+        Text("未読 \(viewModel.unreadCount)")
+            .font(.system(.caption, design: .rounded, weight: .bold))
+            .foregroundStyle(MolokaiTheme.primary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(Capsule().fill(MolokaiTheme.elevated))
+            .overlay {
+                Capsule().strokeBorder(MolokaiTheme.primary.opacity(0.28), lineWidth: 1)
+            }
     }
 }
 
@@ -252,20 +280,11 @@ private struct ArticleRowView: View {
         .padding(.vertical, 14)
         .background {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            (isSelected ? MolokaiTheme.elevated : MolokaiTheme.surface).opacity(0.76),
-                            MolokaiTheme.elevated.opacity(isSelected ? 0.66 : 0.50)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .fill(isSelected ? MolokaiTheme.elevated : MolokaiTheme.surface)
                 .overlay {
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
                         .strokeBorder(
-                            isSelected ? MolokaiTheme.primary.opacity(0.55) : MolokaiTheme.text.opacity(0.05),
+                            isSelected ? MolokaiTheme.primary.opacity(0.55) : MolokaiTheme.text.opacity(0.08),
                             lineWidth: isSelected ? 1.2 : 1
                         )
                 }
@@ -278,6 +297,9 @@ private struct ArticleRowView: View {
             .foregroundStyle(MolokaiTheme.text)
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
-            .background(Capsule().fill(tint.opacity(0.18)))
+            .background(Capsule().fill(MolokaiTheme.elevated))
+            .overlay {
+                Capsule().strokeBorder(tint.opacity(0.28), lineWidth: 1)
+            }
     }
 }

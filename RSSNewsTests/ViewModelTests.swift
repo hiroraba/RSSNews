@@ -106,6 +106,118 @@ struct ViewModelTests {
         #expect(viewModel.lastRefreshDate == nil)
     }
 
+    @Test func articleListViewModelは現在の一覧に対する未読件数を返す() throws {
+        let container = try TestSupport.makeModelContainer()
+        let context = ModelContext(container)
+        let feed = RSSFeed(url: "https://example.com/feed.xml", title: "Feed")
+        context.insert(feed)
+        context.insert(
+            Article(
+                link: "https://example.com/articles/1",
+                title: "Unread",
+                sourceName: "Feed",
+                publishedAt: .now,
+                summary: "Unread summary",
+                category: .technology,
+                isRead: false,
+                feed: feed
+            )
+        )
+        context.insert(
+            Article(
+                link: "https://example.com/articles/2",
+                title: "Read",
+                sourceName: "Feed",
+                publishedAt: .now.addingTimeInterval(-60),
+                summary: "Read summary",
+                category: .technology,
+                isRead: true,
+                feed: feed
+            )
+        )
+        try context.save()
+
+        let environment = AppEnvironment(
+            rssFetcher: MockRSSFetcher(result: .success(Data())),
+            rssParser: MockRSSParser(result: .success(
+                ParsedRSSFeed(title: "Feed", items: [TestSupport.makeParsedItem()])
+            )),
+            categorizer: NewsCategorizer(),
+            feedRepository: FeedRepository(modelContext: context),
+            articleRepository: ArticleRepository(modelContext: context, categorizer: NewsCategorizer()),
+            feedRefreshCoordinator: FeedRefreshCoordinator()
+        )
+        let viewModel = ArticleListViewModel(environment: environment)
+
+        viewModel.loadArticles()
+
+        #expect(viewModel.unreadCount == 1)
+    }
+
+    @Test func articleListViewModelは条件クリアで検索と絞り込みを初期状態へ戻す() throws {
+        let container = try TestSupport.makeModelContainer()
+        let context = ModelContext(container)
+        let feed = RSSFeed(url: "https://example.com/feed.xml", title: "Feed")
+        context.insert(feed)
+        context.insert(
+            Article(
+                link: "https://example.com/articles/1",
+                title: "Swift",
+                sourceName: "Feed",
+                publishedAt: .now,
+                summary: "favorite unread",
+                category: .technology,
+                isRead: false,
+                isFavorite: true,
+                feed: feed
+            )
+        )
+        context.insert(
+            Article(
+                link: "https://example.com/articles/2",
+                title: "Culture",
+                sourceName: "Feed",
+                publishedAt: .now.addingTimeInterval(-60),
+                summary: "read item",
+                category: .culture,
+                isRead: true,
+                isFavorite: false,
+                feed: feed
+            )
+        )
+        try context.save()
+
+        let environment = AppEnvironment(
+            rssFetcher: MockRSSFetcher(result: .success(Data())),
+            rssParser: MockRSSParser(result: .success(
+                ParsedRSSFeed(title: "Feed", items: [TestSupport.makeParsedItem()])
+            )),
+            categorizer: NewsCategorizer(),
+            feedRepository: FeedRepository(modelContext: context),
+            articleRepository: ArticleRepository(modelContext: context, categorizer: NewsCategorizer()),
+            feedRefreshCoordinator: FeedRefreshCoordinator()
+        )
+        let viewModel = ArticleListViewModel(environment: environment)
+
+        viewModel.searchText = "Swift"
+        viewModel.selectedCategory = .technology
+        viewModel.favoritesOnly = true
+        viewModel.unreadOnly = true
+        viewModel.loadArticles()
+
+        #expect(viewModel.hasActiveFilters)
+        #expect(viewModel.articles.count == 1)
+
+        viewModel.resetFilters()
+
+        #expect(!viewModel.hasActiveFilters)
+        #expect(viewModel.searchText.isEmpty)
+        #expect(viewModel.selectedCategory == .all)
+        #expect(viewModel.favoritesOnly == false)
+        #expect(viewModel.unreadOnly == false)
+        #expect(viewModel.articles.count == 2)
+    }
+
     @Test func feedManagementViewModelはフィード追加時に取得結果を保存する() async throws {
         let container = try TestSupport.makeModelContainer()
         let context = ModelContext(container)

@@ -76,6 +76,9 @@ struct ArticleDetailView: View {
             .foregroundStyle(MolokaiTheme.text)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(Capsule().fill(tint.opacity(0.12)))
+            .background(Capsule().fill(MolokaiTheme.elevated))
+            .overlay {
+                Capsule().strokeBorder(tint.opacity(0.28), lineWidth: 1)
+            }
     }
 }
