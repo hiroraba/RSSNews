@@ -378,4 +378,58 @@ struct ViewModelTests {
         #expect(viewModel.refreshingFeedURLs.isEmpty)
         #expect(!viewModel.isRefreshing(feed))
     }
+
+    @Test func feedManagementViewModelは未登録のおすすめRSSだけ返す() async throws {
+        let container = try TestSupport.makeModelContainer()
+        let context = ModelContext(container)
+        let feedRepository = FeedRepository(modelContext: context)
+        let articleRepository = ArticleRepository(modelContext: context, categorizer: NewsCategorizer())
+        let alreadyAdded = RecommendedFeed.catalog[0]
+        _ = try feedRepository.addFeed(urlString: alreadyAdded.url, title: alreadyAdded.title)
+
+        let environment = AppEnvironment(
+            rssFetcher: MockRSSFetcher(result: .success(Data())),
+            rssParser: MockRSSParser(result: .success(
+                ParsedRSSFeed(title: "Feed", items: [TestSupport.makeParsedItem()])
+            )),
+            categorizer: NewsCategorizer(),
+            feedRepository: feedRepository,
+            articleRepository: articleRepository,
+            feedRefreshCoordinator: FeedRefreshCoordinator()
+        )
+        let viewModel = FeedManagementViewModel(environment: environment)
+
+        viewModel.loadFeeds()
+
+        #expect(!viewModel.recommendedFeeds.contains(alreadyAdded))
+        #expect(viewModel.recommendedFeeds.count == RecommendedFeed.catalog.count - 1)
+    }
+
+    @Test func feedManagementViewModelはおすすめRSSから追加できる() async throws {
+        let container = try TestSupport.makeModelContainer()
+        let context = ModelContext(container)
+        let feedRepository = FeedRepository(modelContext: context)
+        let articleRepository = ArticleRepository(modelContext: context, categorizer: NewsCategorizer())
+        let recommendation = RecommendedFeed.catalog[1]
+
+        let environment = AppEnvironment(
+            rssFetcher: MockRSSFetcher(result: .success(Data("rss".utf8))),
+            rssParser: MockRSSParser(result: .success(
+                ParsedRSSFeed(title: "Suggested Feed", items: [TestSupport.makeParsedItem()])
+            )),
+            categorizer: NewsCategorizer(),
+            feedRepository: feedRepository,
+            articleRepository: articleRepository,
+            feedRefreshCoordinator: FeedRefreshCoordinator()
+        )
+        let viewModel = FeedManagementViewModel(environment: environment)
+
+        await viewModel.addRecommendedFeed(recommendation)
+
+        #expect(viewModel.feeds.count == 1)
+        #expect(viewModel.feeds.first?.url == recommendation.url)
+        #expect(viewModel.feeds.first?.title == "Suggested Feed")
+        #expect(!viewModel.recommendedFeeds.contains(recommendation))
+        #expect(viewModel.errorMessage == nil)
+    }
 }

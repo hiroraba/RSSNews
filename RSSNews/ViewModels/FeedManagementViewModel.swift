@@ -20,6 +20,11 @@ final class FeedManagementViewModel: ObservableObject {
         self.environment = environment
     }
 
+    var recommendedFeeds: [RecommendedFeed] {
+        let registeredURLs = Set(feeds.map(\.url))
+        return RecommendedFeed.catalog.filter { !registeredURLs.contains($0.url) }
+    }
+
     func loadFeeds() {
         do {
             feeds = try environment.feedRepository.fetchFeeds()
@@ -29,31 +34,11 @@ final class FeedManagementViewModel: ObservableObject {
     }
 
     func addFeed() async {
-        let trimmed = newFeedURL.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else {
-            errorMessage = RSSServiceError.emptyFeedURL.localizedDescription
-            return
-        }
+        await addFeed(urlString: newFeedURL, shouldClearInput: true)
+    }
 
-        guard let url = URL(string: trimmed) else {
-            errorMessage = RSSServiceError.invalidURL.localizedDescription
-            return
-        }
-
-        isLoading = true
-        defer { isLoading = false }
-
-        do {
-            let data = try await environment.rssFetcher.fetch(from: url)
-            let parsedFeed = try environment.rssParser.parse(data: data)
-            let feed = try environment.feedRepository.addFeed(urlString: trimmed, title: parsedFeed.title)
-            try environment.articleRepository.upsert(items: parsedFeed.items, for: feed)
-            try environment.feedRepository.updateFetchedDate(for: feed)
-            loadFeeds()
-            newFeedURL = ""
-        } catch {
-            errorMessage = error.localizedDescription
-        }
+    func addRecommendedFeed(_ feed: RecommendedFeed) async {
+        await addFeed(urlString: feed.url, shouldClearInput: false)
     }
 
     func removeFeeds(at offsets: IndexSet) {
@@ -106,5 +91,35 @@ final class FeedManagementViewModel: ObservableObject {
 
     func isRefreshing(_ feed: RSSFeed) -> Bool {
         environment.feedRefreshCoordinator.isRefreshingFeed(feed.url)
+    }
+
+    private func addFeed(urlString: String, shouldClearInput: Bool) async {
+        let trimmed = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            errorMessage = RSSServiceError.emptyFeedURL.localizedDescription
+            return
+        }
+
+        guard let url = URL(string: trimmed) else {
+            errorMessage = RSSServiceError.invalidURL.localizedDescription
+            return
+        }
+
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            let data = try await environment.rssFetcher.fetch(from: url)
+            let parsedFeed = try environment.rssParser.parse(data: data)
+            let feed = try environment.feedRepository.addFeed(urlString: trimmed, title: parsedFeed.title)
+            try environment.articleRepository.upsert(items: parsedFeed.items, for: feed)
+            try environment.feedRepository.updateFetchedDate(for: feed)
+            loadFeeds()
+            if shouldClearInput {
+                newFeedURL = ""
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 }
