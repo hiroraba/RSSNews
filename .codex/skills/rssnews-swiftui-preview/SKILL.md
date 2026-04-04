@@ -26,3 +26,4 @@ description: RSSNews リポジトリで SwiftUI 画面変更を確認すると�
 - UI 変更でも責務分離は維持する。View の確認と、ViewModel / Service の責務混在は別問題として見る。
 - Preview が使えるなら、実装後の確認に積極的に使う。
 - Preview だけで十分でない場合は、ビルドやテスト結果も合わせて判断する。
+- merge 済み PR に対する UI follow-up は既存 PR を編集せず、別 branch / 別 pull request として扱う。

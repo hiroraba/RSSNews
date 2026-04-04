@@ -56,6 +56,7 @@ xcodebuild test -project RSSNews.xcodeproj -scheme RSSNews -destination 'platfor
 - review sub-agent で有意な指摘が出た場合は、可能なら修正してから完了する。未対応なら理由を明記する。
 - 最終報告では、別モデル review を実施したことと、重要な指摘の有無を明記する。
 - 最終報告では、上記に加えて、修正を知らない別メンバーが差分の概観をすぐ理解できる短い説明を必ず含める。
+- 既に merge 済みの pull request は修正しない。追加修正や派生対応が必要な場合は、別 branch / 別 pull request として扱う。
 - `README.md` と `RSSNews/README.md` は、ユーザーから明示的に依頼された場合のみ更新する。
 - 機能変更時は、関連テストの追加・更新要否を確認する。
 - 修正後は、影響範囲に応じたユニットテストを原則実行する。

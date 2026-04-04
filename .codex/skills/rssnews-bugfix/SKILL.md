@@ -32,3 +32,4 @@ description: RSSNews リポジトリで不具合修正を行うときに使う�
 
 - 可能なら不具合修正は単独コミットに分ける。
 - ユーザーから明示依頼がない限り、README 変更を同じコミットに含めない。
+- 既に merge 済みの pull request へ修正を積み増さず、追加対応は別 branch / 別 pull request として扱う。
