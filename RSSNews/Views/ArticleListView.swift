@@ -70,7 +70,7 @@ struct ArticleListView: View {
 
             articleListPanel
         }
-        .padding(20)
+        .padding(MolokaiTheme.pagePadding)
     }
 
     private var detailPane: some View {
@@ -133,16 +133,18 @@ struct ArticleListView: View {
                 .font(.system(.largeTitle, design: .rounded, weight: .bold))
                 .foregroundStyle(MolokaiTheme.text)
             Text("左側のリストから記事を選ぶと、本文とメタデータをここに表示します。")
+                .font(.system(.body, design: .rounded))
                 .foregroundStyle(MolokaiTheme.textMuted)
+                .lineSpacing(4)
                 .multilineTextAlignment(.center)
-                .frame(maxWidth: 320)
+                .frame(maxWidth: 360)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .molokaiGlassCard(
             tint: MolokaiTheme.primary.opacity(0.08),
             stroke: MolokaiTheme.primary.opacity(0.18)
         )
-        .padding(20)
+        .padding(MolokaiTheme.pagePadding)
     }
 }
 
@@ -161,17 +163,19 @@ private struct ArticleFilterBar: View {
                         unreadBadge
                     }
                     Text("未読やお気に入りを絞り込みながら、好みの順で一覧できます。")
+                        .font(.system(.body, design: .rounded))
                         .foregroundStyle(MolokaiTheme.textMuted)
+                        .lineSpacing(4)
                 }
 
                 Spacer()
 
                 if let lastRefreshDate = viewModel.lastRefreshDate {
                     Label(lastRefreshDate.formatted(date: .abbreviated, time: .shortened), systemImage: "clock")
-                        .font(.system(.caption, design: .rounded, weight: .medium))
+                        .font(.system(.subheadline, design: .rounded, weight: .semibold))
                         .foregroundStyle(MolokaiTheme.secondary)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
                         .background(Capsule().fill(MolokaiTheme.elevated))
                         .overlay {
                             Capsule().strokeBorder(MolokaiTheme.secondary.opacity(0.28), lineWidth: 1)
@@ -180,13 +184,14 @@ private struct ArticleFilterBar: View {
             }
 
             VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 14) {
+                HStack(alignment: .top, spacing: 14) {
                     Picker("カテゴリ", selection: $viewModel.selectedCategory) {
                         ForEach(NewsCategory.allCases) { category in
                             Text(category.rawValue).tag(category)
                         }
                     }
                     .pickerStyle(.menu)
+                    .controlSize(.large)
 
                     Picker("並び順", selection: $viewModel.selectedSort) {
                         ForEach(ArticleSortOption.allCases) { option in
@@ -194,6 +199,7 @@ private struct ArticleFilterBar: View {
                         }
                     }
                     .pickerStyle(.menu)
+                    .controlSize(.large)
 
                     Spacer(minLength: 0)
                 }
@@ -201,9 +207,11 @@ private struct ArticleFilterBar: View {
                 HStack(spacing: 14) {
                     Toggle("未読のみ", isOn: $viewModel.unreadOnly)
                         .toggleStyle(.switch)
+                        .font(.system(.body, design: .rounded))
 
                     Toggle("お気に入りのみ", isOn: $viewModel.favoritesOnly)
                         .toggleStyle(.switch)
+                        .font(.system(.body, design: .rounded))
 
                     Spacer(minLength: 0)
 
@@ -217,7 +225,7 @@ private struct ArticleFilterBar: View {
             }
             .foregroundStyle(MolokaiTheme.text)
         }
-        .padding(20)
+        .padding(MolokaiTheme.cardPadding)
         .molokaiGlassCard(
             tint: MolokaiTheme.text.opacity(0.05),
             stroke: MolokaiTheme.text.opacity(0.10)
@@ -230,10 +238,10 @@ private struct ArticleFilterBar: View {
 
     private var unreadBadge: some View {
         Text("未読 \(viewModel.unreadCount)")
-            .font(.system(.caption, design: .rounded, weight: .bold))
+            .font(.system(.subheadline, design: .rounded, weight: .bold))
             .foregroundStyle(MolokaiTheme.primary)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
             .background(Capsule().fill(MolokaiTheme.elevated))
             .overlay {
                 Capsule().strokeBorder(MolokaiTheme.primary.opacity(0.28), lineWidth: 1)
@@ -274,8 +282,9 @@ private struct ArticleRowView: View {
                 }
 
                 Text(article.summary.isEmpty ? "概要なし" : article.summary)
-                    .font(.system(.subheadline, design: .rounded))
+                    .font(.system(.body, design: .rounded))
                     .foregroundStyle(MolokaiTheme.textMuted)
+                    .lineSpacing(4)
                     .lineLimit(2)
 
                 HStack(spacing: 10) {
@@ -285,13 +294,13 @@ private struct ArticleRowView: View {
                     Spacer(minLength: 8)
 
                     Text(article.publishedAt.formatted(date: .abbreviated, time: .shortened))
-                        .font(.system(.caption, design: .rounded, weight: .medium))
+                        .font(.system(.subheadline, design: .rounded, weight: .medium))
                         .foregroundStyle(MolokaiTheme.textMuted)
                 }
             }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 14)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 16)
         .background {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(isSelected ? MolokaiTheme.elevated : MolokaiTheme.surface)
@@ -307,10 +316,10 @@ private struct ArticleRowView: View {
 
     private func tag(_ text: String, tint: Color) -> some View {
         Text(text)
-            .font(.system(.caption, design: .rounded, weight: .medium))
+            .font(.system(.subheadline, design: .rounded, weight: .medium))
             .foregroundStyle(MolokaiTheme.text)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
             .background(Capsule().fill(MolokaiTheme.elevated))
             .overlay {
                 Capsule().strokeBorder(tint.opacity(0.28), lineWidth: 1)

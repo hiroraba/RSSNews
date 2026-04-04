@@ -42,11 +42,13 @@ struct SettingsView: View {
     private var hero: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Control Surface")
+                Text("設定")
                     .font(.system(.largeTitle, design: .rounded, weight: .bold))
                     .foregroundStyle(MolokaiTheme.text)
-                Text("Molokai の彩度を抑えたネオンで、更新挙動と記事動線を調整します。")
+                Text("更新の挙動、既読化、フィード状態を読みやすいサイズで調整します。")
+                    .font(.system(.body, design: .rounded))
                     .foregroundStyle(MolokaiTheme.textMuted)
+                    .lineSpacing(4)
             }
             Spacer()
             Image(systemName: "slider.horizontal.3")
@@ -61,12 +63,14 @@ struct SettingsView: View {
 
     private var settingsCard: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("Behavior")
+            Text("基本動作")
                 .font(.system(.title3, design: .rounded, weight: .bold))
                 .foregroundStyle(MolokaiTheme.text)
 
             Toggle("起動時にRSSを自動更新", isOn: $viewModel.autoRefreshOnLaunch)
+                .font(.system(.body, design: .rounded))
             Toggle("記事詳細を開いたら既読にする", isOn: $viewModel.markAsReadOnOpen)
+                .font(.system(.body, design: .rounded))
         }
         .toggleStyle(.switch)
         .foregroundStyle(MolokaiTheme.text)
@@ -76,12 +80,13 @@ struct SettingsView: View {
 
     private var feedCard: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Feed Switchboard")
+            Text("フィード状態")
                 .font(.system(.title3, design: .rounded, weight: .bold))
                 .foregroundStyle(MolokaiTheme.text)
 
             if feedViewModel.feeds.isEmpty {
                 Text("RSSフィードはまだ登録されていません。")
+                    .font(.system(.body, design: .rounded))
                     .foregroundStyle(MolokaiTheme.textMuted)
             } else {
                 ForEach(feedViewModel.feeds) { feed in
@@ -94,16 +99,17 @@ struct SettingsView: View {
                         ) {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(feed.title)
-                                    .font(.system(.headline, design: .rounded, weight: .semibold))
+                                    .font(.system(.title3, design: .rounded, weight: .semibold))
                                     .foregroundStyle(MolokaiTheme.text)
                                 Text(feed.url)
-                                    .font(.system(.caption, design: .rounded))
+                                    .font(.system(.body, design: .rounded))
                                     .foregroundStyle(MolokaiTheme.textMuted)
                                 Text(lastFetchedText(for: feed))
-                                    .font(.system(.caption, design: .rounded))
+                                    .font(.system(.subheadline, design: .rounded))
                                     .foregroundStyle(MolokaiTheme.secondary)
                             }
                         }
+                        .font(.system(.body, design: .rounded))
 
                         Spacer(minLength: 12)
 
@@ -135,13 +141,16 @@ struct SettingsView: View {
 
     private var aboutCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("About")
+            Text("このアプリについて")
                 .font(.system(.title3, design: .rounded, weight: .bold))
                 .foregroundStyle(MolokaiTheme.text)
             Text("完全無料の個人用ニュース整理MVPです。")
+                .font(.system(.body, design: .rounded))
                 .foregroundStyle(MolokaiTheme.text)
             Text("取得元はRSSのみで、外部サーバーや有料APIは使用しません。")
+                .font(.system(.body, design: .rounded))
                 .foregroundStyle(MolokaiTheme.textMuted)
+                .lineSpacing(4)
         }
         .padding(22)
         .molokaiGlassCard(tint: MolokaiTheme.primary.opacity(0.07), stroke: MolokaiTheme.primary.opacity(0.16))
