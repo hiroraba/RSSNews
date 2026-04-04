@@ -8,10 +8,14 @@ import Combine
 
 @MainActor
 final class ArticleListViewModel: ObservableObject {
+    static let allSourcesOption = "すべての配信元"
+
     @Published private(set) var articles: [Article] = []
+    @Published private(set) var availableSources: [String] = [ArticleListViewModel.allSourcesOption]
     @Published var selectedArticle: Article?
     @Published var searchText = ""
     @Published var selectedCategory: NewsCategory = .all
+    @Published var selectedSource = ArticleListViewModel.allSourcesOption
     @Published var selectedSort: ArticleSortOption = .newestFirst
     @Published var favoritesOnly = false
     @Published var unreadOnly = false
@@ -30,7 +34,7 @@ final class ArticleListViewModel: ObservableObject {
     }
 
     var hasActiveFilters: Bool {
-        !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || selectedCategory != .all || favoritesOnly || unreadOnly
+        !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || selectedCategory != .all || selectedSource != Self.allSourcesOption || favoritesOnly || unreadOnly
         || selectedSort != .newestFirst
     }
 
@@ -40,14 +44,23 @@ final class ArticleListViewModel: ObservableObject {
 
     func loadArticles() {
         do {
+            let sourceNames = try environment.articleRepository.fetchSourceNames()
+            availableSources = [Self.allSourcesOption] + sourceNames
+            if !availableSources.contains(selectedSource) {
+                selectedSource = Self.allSourcesOption
+            }
             articles = try environment.articleRepository.searchArticles(
                 query: searchText,
                 category: selectedCategory,
+                sourceName: selectedSource == Self.allSourcesOption ? nil : selectedSource,
                 favoritesOnly: favoritesOnly,
                 unreadOnly: unreadOnly,
                 sort: selectedSort
             )
-            if selectedArticle == nil {
+            if let selectedArticle, !articles.contains(where: { $0.id == selectedArticle.id }) {
+                self.selectedArticle = nil
+            }
+            if self.selectedArticle == nil {
                 selectedArticle = articles.first
             }
         } catch {
@@ -124,6 +137,7 @@ final class ArticleListViewModel: ObservableObject {
     func resetFilters() {
         searchText = ""
         selectedCategory = .all
+        selectedSource = Self.allSourcesOption
         selectedSort = .newestFirst
         favoritesOnly = false
         unreadOnly = false

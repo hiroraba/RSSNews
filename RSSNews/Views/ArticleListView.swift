@@ -188,6 +188,13 @@ private struct ArticleFilterBar: View {
                     }
                     .pickerStyle(.menu)
 
+                    Picker("配信元", selection: $viewModel.selectedSource) {
+                        ForEach(viewModel.availableSources, id: \.self) { source in
+                            Text(source).tag(source)
+                        }
+                    }
+                    .pickerStyle(.menu)
+
                     Picker("並び順", selection: $viewModel.selectedSort) {
                         ForEach(ArticleSortOption.allCases) { option in
                             Text(option.rawValue).tag(option)
@@ -223,6 +230,7 @@ private struct ArticleFilterBar: View {
             stroke: MolokaiTheme.text.opacity(0.10)
         )
         .onChange(of: viewModel.selectedCategory) { _, _ in viewModel.loadArticles() }
+        .onChange(of: viewModel.selectedSource) { _, _ in viewModel.loadArticles() }
         .onChange(of: viewModel.selectedSort) { _, _ in viewModel.loadArticles() }
         .onChange(of: viewModel.unreadOnly) { _, _ in viewModel.loadArticles() }
         .onChange(of: viewModel.favoritesOnly) { _, _ in viewModel.loadArticles() }
