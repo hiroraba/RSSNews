@@ -45,4 +45,5 @@ description: RSSNews リポジトリで作業完了時に使う。最終報告�
 
 - bugfix と feature が同時にある場合は、ユーザーが理解しやすい単位でまとめる。
 - review 未実施や test 未実行は省略せず、理由を書く。
+- 既に merge 済みの pull request に対する追加入力が必要なら、その差分は別 branch / 別 pull request として扱ったことを明記する。
 - 既存の AGENTS.md の指示と矛盾する場合は、そちらを優先する。
