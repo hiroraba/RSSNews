@@ -46,6 +46,9 @@ final class ArticleListViewModel: ObservableObject {
         do {
             let sourceNames = try environment.articleRepository.fetchSourceNames()
             availableSources = [Self.allSourcesOption] + sourceNames
+            if !availableSources.contains(selectedSource) {
+                selectedSource = Self.allSourcesOption
+            }
             articles = try environment.articleRepository.searchArticles(
                 query: searchText,
                 category: selectedCategory,

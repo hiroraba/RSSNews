@@ -279,6 +279,52 @@ struct ViewModelTests {
         #expect(viewModel.hasActiveFilters)
     }
 
+    @Test func articleListViewModelは選択中の配信元が消えたら全配信元へ戻す() throws {
+        let container = try TestSupport.makeModelContainer()
+        let context = ModelContext(container)
+        let feed = RSSFeed(url: "https://example.com/feed.xml", title: "Original Feed")
+        context.insert(feed)
+        let article = Article(
+            link: "https://example.com/articles/1",
+            title: "Article 1",
+            sourceName: "Original Feed",
+            publishedAt: .now,
+            summary: "Summary",
+            category: .technology,
+            feed: feed
+        )
+        context.insert(article)
+        try context.save()
+
+        let environment = AppEnvironment(
+            rssFetcher: MockRSSFetcher(result: .success(Data())),
+            rssParser: MockRSSParser(result: .success(
+                ParsedRSSFeed(title: "Feed", items: [TestSupport.makeParsedItem()])
+            )),
+            categorizer: NewsCategorizer(),
+            feedRepository: FeedRepository(modelContext: context),
+            articleRepository: ArticleRepository(modelContext: context, categorizer: NewsCategorizer()),
+            feedRefreshCoordinator: FeedRefreshCoordinator()
+        )
+        let viewModel = ArticleListViewModel(environment: environment)
+
+        viewModel.loadArticles()
+        viewModel.selectedSource = "Original Feed"
+        viewModel.loadArticles()
+
+        #expect(viewModel.articles.count == 1)
+
+        article.sourceName = "Renamed Feed"
+        try context.save()
+
+        viewModel.loadArticles()
+
+        #expect(viewModel.selectedSource == ArticleListViewModel.allSourcesOption)
+        #expect(viewModel.availableSources == [ArticleListViewModel.allSourcesOption, "Renamed Feed"])
+        #expect(viewModel.articles.count == 1)
+        #expect(viewModel.articles.first?.sourceName == "Renamed Feed")
+    }
+
     @Test func feedManagementViewModelはフィード追加時に取得結果を保存する() async throws {
         let container = try TestSupport.makeModelContainer()
         let context = ModelContext(container)
