@@ -50,8 +50,10 @@ xcodebuild test -project RSSNews.xcodeproj -scheme RSSNews -destination 'platfor
 - 最小差分を優先し、依頼範囲に直接必要な変更だけを入れる。
 - 既存の命名、ディレクトリ構成、実装スタイルを尊重する。
 - Codex は変更完了時に自動でコミットしてよいが、`git push` を行う前には必ず事前確認を取る。
-- コミットメッセージは原則として日本語で記述する。
-- コミットメッセージの先頭には変更種別が分かる絵文字を付ける。例: 機能追加は `✨`、バグ修正は `🐛`、リファクタリングは `♻️`、コードの見た目だけの修正は `🎨`、UI修正は `🖥️`、テスト追加・更新は `✅`、設定や運用ルール変更は `📝`。
+- コミットメッセージは [Conventional Commits 1.0.0 日本語版](https://www.conventionalcommits.org/ja/v1.0.0/) に従う。
+- 先頭行は `<type>[optional scope]: <description>` 形式にする。`type` は少なくとも `feat` と `fix` を使い分け、必要に応じて `docs`、`refactor`、`test`、`chore` などを使ってよい。
+- 破壊的変更がある場合は `type(scope)!:` か `BREAKING CHANGE:` フッターで明示する。
+- `description` は簡潔で内容が分かる文にし、日本語で記述してよい。絵文字は付けない。
 - コード変更後は、完了前に必ず別モデルの sub-agent へコードレビューを依頼する。レビュー対象は変更差分に絞り、バグ、回帰、境界条件、テスト不足を確認する。
 - review sub-agent で有意な指摘が出た場合は、可能なら修正してから完了する。未対応なら理由を明記する。
 - 最終報告では、別モデル review を実施したことと、重要な指摘の有無を明記する。
