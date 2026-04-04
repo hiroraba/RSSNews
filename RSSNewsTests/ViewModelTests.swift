@@ -432,4 +432,10 @@ struct ViewModelTests {
         #expect(!viewModel.recommendedFeeds.contains(recommendation))
         #expect(viewModel.errorMessage == nil)
     }
+
+    @Test func recommendedFeedCatalogのASCIIは現行のRSSURLを使う() throws {
+        let asciiFeed = try #require(RecommendedFeed.catalog.first(where: { $0.title == "ASCII.jp" }))
+
+        #expect(asciiFeed.url == "https://ascii.jp/rss.xml")
+    }
 }

@@ -31,7 +31,7 @@ struct RecommendedFeed: Identifiable, Equatable {
         ),
         RecommendedFeed(
             title: "ASCII.jp",
-            url: "https://www.ascii.jp/cate/1/rss.xml",
+            url: "https://ascii.jp/rss.xml",
             categoryLabel: "ITニュース",
             summary: "国内 IT の新製品、業界動向、開発トピックをまとめて確認できます。",
             symbolName: "dot.radiowaves.left.and.right"
