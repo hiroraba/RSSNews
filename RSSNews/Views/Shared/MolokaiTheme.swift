@@ -15,7 +15,12 @@ enum MolokaiTheme {
     static let success = Color(red: 0.54, green: 0.78, blue: 0.26)
     static let warning = Color(red: 0.99, green: 0.74, blue: 0.26)
     static let text = Color(red: 0.97, green: 0.97, blue: 0.95)
-    static let textMuted = Color(red: 0.70, green: 0.73, blue: 0.70)
+    static let textMuted = Color(red: 0.79, green: 0.82, blue: 0.79)
+    static let borderStrong = Color.white.opacity(0.18)
+
+    static let pagePadding: CGFloat = 24
+    static let cardPadding: CGFloat = 24
+    static let controlMinHeight: CGFloat = 44
 
     static let chromeGradient = LinearGradient(
         colors: [
@@ -90,10 +95,12 @@ struct MolokaiChromeButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(.subheadline, design: .rounded, weight: .semibold))
+            .font(.system(.body, design: .rounded, weight: .semibold))
+            .multilineTextAlignment(.center)
             .foregroundStyle(MolokaiTheme.text)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 9)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 12)
+            .frame(minHeight: MolokaiTheme.controlMinHeight)
             .background {
                 Capsule(style: .continuous)
                     .fill(MolokaiTheme.elevated)
@@ -114,11 +121,34 @@ struct MolokaiChromeButtonStyle: ButtonStyle {
     }
 }
 
+struct MolokaiInputFieldStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.system(.body, design: .rounded))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .frame(minHeight: MolokaiTheme.controlMinHeight)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(MolokaiTheme.surface)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .strokeBorder(MolokaiTheme.borderStrong, lineWidth: 1)
+                    )
+            )
+            .foregroundStyle(MolokaiTheme.text)
+    }
+}
+
 extension View {
     func molokaiGlassCard(
         tint: Color = MolokaiTheme.text.opacity(0.06),
         stroke: Color = MolokaiTheme.text.opacity(0.12)
     ) -> some View {
         modifier(MolokaiGlassCard(tint: tint, stroke: stroke))
+    }
+
+    func molokaiInputField() -> some View {
+        modifier(MolokaiInputFieldStyle())
     }
 }

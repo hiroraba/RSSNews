@@ -16,7 +16,9 @@ struct FeedManagementView: View {
                     .font(.system(.largeTitle, design: .rounded, weight: .bold))
                     .foregroundStyle(MolokaiTheme.text)
                 Text("RSS フィードの追加、確認、削除を行います。")
+                    .font(.system(.body, design: .rounded))
                     .foregroundStyle(MolokaiTheme.textMuted)
+                    .lineSpacing(4)
             }
 
             recommendedFeedsSection
@@ -24,17 +26,7 @@ struct FeedManagementView: View {
             HStack(spacing: 12) {
                 TextField("https://example.com/feed.xml", text: $viewModel.newFeedURL)
                     .textFieldStyle(.plain)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 14)
-                    .background(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .fill(MolokaiTheme.surface)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                    .strokeBorder(MolokaiTheme.text.opacity(0.10), lineWidth: 1)
-                            )
-                    )
-                    .foregroundStyle(MolokaiTheme.text)
+                    .molokaiInputField()
 
                 Button("登録") {
                     Task { await viewModel.addFeed() }
@@ -45,33 +37,34 @@ struct FeedManagementView: View {
 
             if viewModel.isLoading {
                 Label("フィード確認中...", systemImage: "rays")
+                    .font(.system(.body, design: .rounded))
                     .foregroundStyle(MolokaiTheme.warning)
             }
 
             List {
                 ForEach(viewModel.feeds) { feed in
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 10) {
                         HStack {
                             Text(feed.title)
-                                .font(.system(.headline, design: .rounded, weight: .semibold))
+                                .font(.system(.title3, design: .rounded, weight: .semibold))
                                 .foregroundStyle(MolokaiTheme.text)
                             Spacer()
                             Text(feed.isEnabled ? "有効" : "停止中")
-                                .font(.system(.caption, design: .rounded, weight: .medium))
+                                .font(.system(.subheadline, design: .rounded, weight: .medium))
                                 .foregroundStyle(feed.isEnabled ? MolokaiTheme.success : MolokaiTheme.warning)
                         }
 
                         Text(feed.url)
-                            .font(.system(.subheadline, design: .rounded))
+                            .font(.system(.body, design: .rounded))
                             .foregroundStyle(MolokaiTheme.textMuted)
 
                         if let lastFetchedAt = feed.lastFetchedAt {
                             Text("最終取得: \(lastFetchedAt.formatted(date: .abbreviated, time: .shortened))")
-                                .font(.system(.caption, design: .rounded))
+                                .font(.system(.subheadline, design: .rounded))
                                 .foregroundStyle(MolokaiTheme.secondary)
                         }
                     }
-                    .padding(14)
+                    .padding(18)
                     .background(
                         RoundedRectangle(cornerRadius: 20, style: .continuous)
                             .fill(MolokaiTheme.surface)
@@ -103,7 +96,7 @@ struct FeedManagementView: View {
                 stroke: MolokaiTheme.text.opacity(0.10)
             )
         }
-        .padding(20)
+        .padding(MolokaiTheme.pagePadding)
         .navigationTitle("RSS管理")
         .onAppear {
             viewModel.loadFeeds()
@@ -123,7 +116,9 @@ struct FeedManagementView: View {
                         .font(.system(.title3, design: .rounded, weight: .bold))
                         .foregroundStyle(MolokaiTheme.text)
                     Text("すぐ読める定番ソースを未登録分だけ表示します。")
+                        .font(.system(.body, design: .rounded))
                         .foregroundStyle(MolokaiTheme.textMuted)
+                        .lineSpacing(4)
                 }
 
                 Spacer()
@@ -131,7 +126,7 @@ struct FeedManagementView: View {
 
             if viewModel.recommendedFeeds.isEmpty {
                 Text("おすすめ候補はすべて登録済みです。")
-                    .font(.system(.subheadline, design: .rounded))
+                    .font(.system(.body, design: .rounded))
                     .foregroundStyle(MolokaiTheme.textMuted)
                     .padding(.vertical, 8)
             } else {
@@ -147,7 +142,7 @@ struct FeedManagementView: View {
                 }
             }
         }
-        .padding(20)
+        .padding(MolokaiTheme.cardPadding)
         .molokaiGlassCard(
             tint: MolokaiTheme.secondary.opacity(0.08),
             stroke: MolokaiTheme.secondary.opacity(0.16)
@@ -172,25 +167,26 @@ private struct RecommendedFeedCard: View {
                 Spacer(minLength: 12)
 
                 Text(feed.categoryLabel)
-                    .font(.system(.caption, design: .rounded, weight: .bold))
+                    .font(.system(.subheadline, design: .rounded, weight: .bold))
                     .foregroundStyle(MolokaiTheme.secondary)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
                     .background(Capsule().fill(MolokaiTheme.elevated))
             }
 
             VStack(alignment: .leading, spacing: 8) {
                 Text(feed.title)
-                    .font(.system(.headline, design: .rounded, weight: .semibold))
+                    .font(.system(.title3, design: .rounded, weight: .semibold))
                     .foregroundStyle(MolokaiTheme.text)
 
                 Text(feed.summary)
-                    .font(.system(.subheadline, design: .rounded))
+                    .font(.system(.body, design: .rounded))
                     .foregroundStyle(MolokaiTheme.textMuted)
+                    .lineSpacing(4)
                     .lineLimit(3)
 
                 Text(feed.url)
-                    .font(.system(.caption, design: .rounded))
+                    .font(.system(.subheadline, design: .rounded))
                     .foregroundStyle(MolokaiTheme.textMuted)
                     .lineLimit(1)
                     .textSelection(.enabled)
@@ -202,8 +198,8 @@ private struct RecommendedFeedCard: View {
             .buttonStyle(MolokaiChromeButtonStyle(tint: MolokaiTheme.primary))
             .disabled(isLoading)
         }
-        .frame(width: 280, alignment: .leading)
-        .padding(18)
+        .frame(width: 320, alignment: .leading)
+        .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .fill(MolokaiTheme.surface)
