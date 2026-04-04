@@ -97,6 +97,7 @@ struct RepositoryTests {
         let unreadFavorites = try repositories.articleRepository.searchArticles(
             query: "swift",
             category: .technology,
+            sourceName: nil,
             favoritesOnly: true,
             unreadOnly: true,
             sort: .newestFirst
@@ -141,6 +142,7 @@ struct RepositoryTests {
         let oldestFirst = try repositories.articleRepository.searchArticles(
             query: "",
             category: .all,
+            sourceName: nil,
             favoritesOnly: false,
             unreadOnly: false,
             sort: .oldestFirst
@@ -148,6 +150,7 @@ struct RepositoryTests {
         let unreadFirst = try repositories.articleRepository.searchArticles(
             query: "",
             category: .all,
+            sourceName: nil,
             favoritesOnly: false,
             unreadOnly: false,
             sort: .unreadFirst
@@ -155,6 +158,7 @@ struct RepositoryTests {
         let favoritesFirst = try repositories.articleRepository.searchArticles(
             query: "",
             category: .all,
+            sourceName: nil,
             favoritesOnly: false,
             unreadOnly: false,
             sort: .favoritesFirst

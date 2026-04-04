@@ -24,13 +24,16 @@ final class ArticleRepository {
     func searchArticles(
         query: String,
         category: NewsCategory,
+        sourceName: String?,
         favoritesOnly: Bool,
         unreadOnly: Bool,
         sort: ArticleSortOption
     ) throws -> [Article] {
         let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let trimmedSourceName = sourceName?.trimmingCharacters(in: .whitespacesAndNewlines)
         let filteredArticles = try fetchArticles().filter { article in
             let categoryMatch = category == .all || article.category == category
+            let sourceMatch = trimmedSourceName?.isEmpty != false || article.sourceName == trimmedSourceName
             let favoriteMatch = !favoritesOnly || article.isFavorite
             let unreadMatch = !unreadOnly || !article.isRead
             let queryMatch: Bool
@@ -42,7 +45,7 @@ final class ArticleRepository {
                 queryMatch = haystack.contains(trimmedQuery)
             }
 
-            return categoryMatch && favoriteMatch && unreadMatch && queryMatch
+            return categoryMatch && sourceMatch && favoriteMatch && unreadMatch && queryMatch
         }
 
         switch sort {
@@ -68,6 +71,19 @@ final class ArticleRepository {
                 }
                 return lhs.publishedAt > rhs.publishedAt
             }
+        }
+    }
+
+    func fetchSourceNames() throws -> [String] {
+        Array(
+            Set(
+                try fetchArticles()
+                    .map(\.sourceName)
+                    .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+            )
+        )
+        .sorted { lhs, rhs in
+            lhs.localizedCaseInsensitiveCompare(rhs) == .orderedAscending
         }
     }
 
