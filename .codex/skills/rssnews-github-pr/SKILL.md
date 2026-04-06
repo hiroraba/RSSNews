@@ -17,7 +17,7 @@ description: RSSNews リポジトリで GitHub 向けプルリクエストを作
 1. `git status --short` と `git log --oneline` で対象コミットと作業ツリーを確認する。
 2. `git diff`, `git diff --stat`, `git log --stat origin/...HEAD` などで PR の要点をまとめる。
 3. テンプレートの各欄を埋める。
-4. title は変更の主目的が分かる短い文にする。
+4. title は変更の主目的が分かる短い日本語の文にする。
 5. `Verification` には実行済みの build、test、Preview だけを書く。未実行ならその旨を書く。
 6. `Review Focus` には reviewer に特に見てほしい点だけを書く。
 7. `gh` が使えるなら `gh pr create --title ... --body-file ...` を使う。使えないなら title と body をそのまま提示する。
@@ -33,9 +33,10 @@ description: RSSNews リポジトリで GitHub 向けプルリクエストを作
 
 ## title の目安
 
-- bugfix: `Fix <what broke>`
-- feature: `Add <user-visible capability>`
-- mixed change: 主目的を 1 つ選び、それに寄せる
+- title は原則として日本語で書く。
+- bugfix: `○○の不具合を修正する`
+- feature: `○○を追加する`
+- mixed change: 主目的を 1 つ選び、日本語でそれに寄せる
 
 ## 補足
 
