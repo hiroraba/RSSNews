@@ -8,11 +8,15 @@ import SwiftData
 
 struct RootTabView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
     @State private var articleViewModel: ArticleListViewModel?
     @State private var feedViewModel: FeedManagementViewModel?
-    @State private var settingsViewModel = SettingsViewModel()
+    @StateObject private var settingsViewModel = SettingsViewModel()
 
     var body: some View {
+        let palette = settingsViewModel.selectedTheme.palette(for: colorScheme)
+        let _ = MolokaiTheme.setCurrentPalette(palette)
+
         MolokaiCanvas {
             if let articleViewModel, let feedViewModel {
                 TabView {
@@ -37,7 +41,6 @@ struct RootTabView: View {
                 }
                 .frame(minWidth: 980, minHeight: 640)
                 .tint(MolokaiTheme.secondary)
-                .preferredColorScheme(.dark)
             } else {
                 ProgressView()
                     .tint(MolokaiTheme.secondary)

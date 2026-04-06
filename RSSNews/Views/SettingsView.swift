@@ -67,6 +67,23 @@ struct SettingsView: View {
                 .font(.system(.title3, design: .rounded, weight: .bold))
                 .foregroundStyle(MolokaiTheme.text)
 
+            VStack(alignment: .leading, spacing: 10) {
+                Text("テーマ")
+                    .font(.system(.body, design: .rounded, weight: .semibold))
+
+                Picker("テーマ", selection: $viewModel.selectedTheme) {
+                    ForEach(AppTheme.allCases) { theme in
+                        Text(theme.label).tag(theme)
+                    }
+                }
+                .pickerStyle(.menu)
+
+                Text("システムを選ぶと、macOS のライト / ダーク表示に合わせてテーマを切り替えます。")
+                    .font(.system(.subheadline, design: .rounded))
+                    .foregroundStyle(MolokaiTheme.textMuted)
+                    .lineSpacing(3)
+            }
+
             Toggle("起動時にRSSを自動更新", isOn: $viewModel.autoRefreshOnLaunch)
                 .font(.system(.body, design: .rounded))
             Toggle("記事詳細を開いたら既読にする", isOn: $viewModel.markAsReadOnOpen)
