@@ -66,6 +66,56 @@ struct RepositoryTests {
         #expect(articles[0].sourceName == "Feed")
     }
 
+    @Test func articleRepositoryはYahooニュース記事の末尾表記から配信元を抽出できる() throws {
+        let repositories = try TestSupport.makeRepositories()
+        let feed = try repositories.feedRepository.addFeed(
+            urlString: "https://news.yahoo.co.jp/rss/categories/world.xml",
+            title: "国際 - Yahoo!ニュース"
+        )
+
+        try repositories.articleRepository.upsert(
+            items: [
+                ParsedRSSItem(
+                    title: "仲介のパキスタン、米・イランに交戦終結案(産経新聞)",
+                    link: "https://news.yahoo.co.jp/articles/example-1?source=rss",
+                    summary: "summary",
+                    publishedAt: .now
+                ),
+                ParsedRSSItem(
+                    title: "目のやり場に困る...ゴルフ女性の「密着ウェア」にネット騒然　「節度が全くない…」（海外）(ニューズウィーク日本版)",
+                    link: "https://news.yahoo.co.jp/articles/example-2?source=rss",
+                    summary: "summary",
+                    publishedAt: .now.addingTimeInterval(-60)
+                )
+            ],
+            for: feed
+        )
+
+        let sankei = try repositories.articleRepository.searchArticles(
+            query: "",
+            category: .all,
+            sourceName: "産経新聞",
+            favoritesOnly: false,
+            unreadOnly: false,
+            sort: .newestFirst
+        )
+        let newsweek = try repositories.articleRepository.searchArticles(
+            query: "",
+            category: .all,
+            sourceName: "ニューズウィーク日本版",
+            favoritesOnly: false,
+            unreadOnly: false,
+            sort: .newestFirst
+        )
+
+        #expect(sankei.count == 1)
+        #expect(sankei.first?.title == "仲介のパキスタン、米・イランに交戦終結案")
+        #expect(sankei.first?.sourceName == "産経新聞")
+        #expect(newsweek.count == 1)
+        #expect(newsweek.first?.title == "目のやり場に困る...ゴルフ女性の「密着ウェア」にネット騒然　「節度が全くない…」（海外）")
+        #expect(newsweek.first?.sourceName == "ニューズウィーク日本版")
+    }
+
     @Test func articleRepositoryは検索条件で絞り込みできる() throws {
         let repositories = try TestSupport.makeRepositories()
         let feed = try repositories.feedRepository.addFeed(urlString: "https://example.com/feed.xml", title: "Feed")

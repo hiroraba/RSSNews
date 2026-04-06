@@ -123,26 +123,61 @@ final class ArticleRepository {
     }
 
     private func upsert(item: ParsedRSSItem, for feed: RSSFeed) throws {
+        let articleTitle = normalizedTitle(from: item.title, link: item.link)
+        let articleSourceName = sourceName(from: item.title, link: item.link) ?? feed.title
+
         if let existing = try article(with: item.link) {
-            existing.title = item.title
+            existing.title = articleTitle
             existing.summary = item.summary
             existing.publishedAt = item.publishedAt
-            existing.sourceName = feed.title
-            existing.category = categorizer.categorize(title: item.title, summary: item.summary)
+            existing.sourceName = articleSourceName
+            existing.category = categorizer.categorize(title: articleTitle, summary: item.summary)
             existing.updatedAt = .now
             existing.feed = feed
         } else {
             let article = Article(
                 link: item.link,
-                title: item.title,
-                sourceName: feed.title,
+                title: articleTitle,
+                sourceName: articleSourceName,
                 publishedAt: item.publishedAt,
                 summary: item.summary,
-                category: categorizer.categorize(title: item.title, summary: item.summary),
+                category: categorizer.categorize(title: articleTitle, summary: item.summary),
                 feed: feed
             )
             modelContext.insert(article)
         }
+    }
+
+    private func sourceName(from title: String, link: String) -> String? {
+        guard isYahooNewsArticle(link: link) else { return nil }
+        guard
+            let openRange = title.lastIndex(of: "("),
+            let closeRange = title.lastIndex(of: ")"),
+            openRange < closeRange
+        else {
+            return nil
+        }
+
+        let source = title[title.index(after: openRange)..<closeRange]
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return source.isEmpty ? nil : source
+    }
+
+    private func normalizedTitle(from title: String, link: String) -> String {
+        guard isYahooNewsArticle(link: link), sourceName(from: title, link: link) != nil else {
+            return title
+        }
+
+        guard let openRange = title.lastIndex(of: "(") else {
+            return title
+        }
+
+        return title[..<openRange].trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func isYahooNewsArticle(link: String) -> Bool {
+        guard let host = URL(string: link)?.host()?.lowercased() else { return false }
+        return host == "news.yahoo.co.jp"
     }
 
     private func article(with link: String) throws -> Article? {
