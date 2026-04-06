@@ -8,9 +8,18 @@
 
 import SwiftUI
 import SwiftData
+import TipKit
 
 @main
 struct RSSNewsApp: App {
+    init() {
+        do {
+            try Tips.configure()
+        } catch {
+            assertionFailure("TipKit initialization failed: \(error.localizedDescription)")
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()

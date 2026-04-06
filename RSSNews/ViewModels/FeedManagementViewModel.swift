@@ -34,10 +34,10 @@ final class FeedManagementViewModel: ObservableObject {
     }
 
     func addFeed() async {
-        await addFeed(urlString: newFeedURL, shouldClearInput: true)
+        _ = await addFeed(urlString: newFeedURL, shouldClearInput: true)
     }
 
-    func addRecommendedFeed(_ feed: RecommendedFeed) async {
+    func addRecommendedFeed(_ feed: RecommendedFeed) async -> Bool {
         await addFeed(urlString: feed.url, shouldClearInput: false)
     }
 
@@ -93,16 +93,16 @@ final class FeedManagementViewModel: ObservableObject {
         environment.feedRefreshCoordinator.isRefreshingFeed(feed.url)
     }
 
-    private func addFeed(urlString: String, shouldClearInput: Bool) async {
+    private func addFeed(urlString: String, shouldClearInput: Bool) async -> Bool {
         let trimmed = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             errorMessage = RSSServiceError.emptyFeedURL.localizedDescription
-            return
+            return false
         }
 
         guard let url = URL(string: trimmed) else {
             errorMessage = RSSServiceError.invalidURL.localizedDescription
-            return
+            return false
         }
 
         isLoading = true
@@ -118,8 +118,10 @@ final class FeedManagementViewModel: ObservableObject {
             if shouldClearInput {
                 newFeedURL = ""
             }
+            return true
         } catch {
             errorMessage = error.localizedDescription
+            return false
         }
     }
 }
