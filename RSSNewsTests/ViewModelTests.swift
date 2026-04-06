@@ -19,11 +19,13 @@ struct ViewModelTests {
         let viewModel = SettingsViewModel(userDefaults: defaults)
         viewModel.autoRefreshOnLaunch = false
         viewModel.markAsReadOnOpen = false
+        viewModel.selectedTheme = .light
 
         let reloaded = SettingsViewModel(userDefaults: defaults)
 
         #expect(reloaded.autoRefreshOnLaunch == false)
         #expect(reloaded.markAsReadOnOpen == false)
+        #expect(reloaded.selectedTheme == .light)
 
         defaults.removePersistentDomain(forName: suiteName)
     }
@@ -424,7 +426,7 @@ struct ViewModelTests {
         )
         let viewModel = FeedManagementViewModel(environment: environment)
 
-        await viewModel.addRecommendedFeed(recommendation)
+        _ = await viewModel.addRecommendedFeed(recommendation)
 
         #expect(viewModel.feeds.count == 1)
         #expect(viewModel.feeds.first?.url == recommendation.url)
