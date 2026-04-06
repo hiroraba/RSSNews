@@ -5,9 +5,11 @@
 
 import SwiftUI
 import SwiftData
+import TipKit
 
 struct FeedManagementView: View {
     @ObservedObject var viewModel: FeedManagementViewModel
+    private let recommendedFeedsTip = RecommendedFeedsTip()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
@@ -124,6 +126,10 @@ struct FeedManagementView: View {
                 Spacer()
             }
 
+            if !viewModel.recommendedFeeds.isEmpty {
+                TipView(recommendedFeedsTip)
+            }
+
             if viewModel.recommendedFeeds.isEmpty {
                 Text("おすすめ候補はすべて登録済みです。")
                     .font(.system(.body, design: .rounded))
@@ -134,7 +140,11 @@ struct FeedManagementView: View {
                     HStack(spacing: 14) {
                         ForEach(viewModel.recommendedFeeds) { feed in
                             RecommendedFeedCard(feed: feed, isLoading: viewModel.isLoading) {
-                                Task { await viewModel.addRecommendedFeed(feed) }
+                                Task {
+                                    if await viewModel.addRecommendedFeed(feed) {
+                                        recommendedFeedsTip.invalidate(reason: .actionPerformed)
+                                    }
+                                }
                             }
                         }
                     }
@@ -147,6 +157,24 @@ struct FeedManagementView: View {
             tint: MolokaiTheme.secondary.opacity(0.08),
             stroke: MolokaiTheme.secondary.opacity(0.16)
         )
+    }
+}
+
+private struct RecommendedFeedsTip: Tip {
+    var title: Text {
+        Text("おすすめRSSから始められます")
+    }
+
+    var message: Text? {
+        Text("未登録の定番フィードをここからすぐ追加できます。まずは1件登録して記事一覧を埋めてみてください。")
+    }
+
+    var image: Image? {
+        Image(systemName: "lightbulb.max")
+    }
+
+    var options: [any TipOption] {
+        MaxDisplayCount(1)
     }
 }
 
